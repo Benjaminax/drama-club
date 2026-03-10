@@ -9,7 +9,7 @@ function HomePage() {
   const [loadingError, setLoadingError] = useState(false)
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/content')
+    fetch(`${import.meta.env.VITE_API_URL || '/api'}/content`)
       .then(res => res.json())
       .then(res => {
         if (res.success && res.data) {
@@ -29,7 +29,7 @@ function HomePage() {
       <div className="min-h-screen bg-stone-900 flex flex-col items-center justify-center text-amber-100 font-serif">
         <div className="w-12 h-12 border-4 border-amber-900/30 border-t-yellow-600 rounded-full animate-spin mb-4" />
         <p className="tracking-widest uppercase text-xs font-bold text-yellow-600">
-          {loadingError ? 'Failed to load content. Check if server is running on http://localhost:5000' : 'Loading Stage...'}
+          {loadingError ? 'Failed to load content. Please check your connection.' : 'Loading Stage...'}
         </p>
         {loadingError && (
           <button 

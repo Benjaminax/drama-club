@@ -343,7 +343,7 @@ app.post('/api/contact', async (req, res) => {
                   <p>Our team typically responds within 24-48 hours during weekdays.</p>
                   <p>In the meantime, feel free to explore our website and learn more about our upcoming events and productions!</p>
                   <div style="text-align: center;">
-                    <a href="http://localhost:5174" class="button" style="color: #1c1917;">Visit Our Website</a>
+                    <a href="${process.env.WEBSITE_URL || 'https://your-domain.vercel.app'}" class="button" style="color: #1c1917;">Visit Our Website</a>
                   </div>
                 </div>
                 <div class="footer">
@@ -472,7 +472,8 @@ app.post('/api/upload', authMiddleware, upload.single('media'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'No file uploaded' });
   }
-  const fileUrl = `http://localhost:${PORT}/uploads/${req.file.filename}`; // Use PORT variable
+  const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+  const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
   res.json({ success: true, url: fileUrl });
 });
 

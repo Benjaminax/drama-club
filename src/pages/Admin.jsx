@@ -11,7 +11,7 @@ export default function Admin() {
     const [activeTab, setActiveTab] = useState('hero')
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/content')
+        fetch(`${import.meta.env.VITE_API_URL || '/api'}/content`)
             .then(res => res.json())
             .then(res => {
                 if (res.success && res.data) {
@@ -21,7 +21,7 @@ export default function Admin() {
         
         // Fetch settings
         const token = localStorage.getItem('adminToken')
-        fetch('http://localhost:5000/api/settings', {
+        fetch(`${import.meta.env.VITE_API_URL || '/api'}/settings`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
@@ -60,7 +60,7 @@ export default function Admin() {
 
         try {
             const token = localStorage.getItem('adminToken')
-            const res = await fetch('http://localhost:5000/api/upload', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/upload`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -101,7 +101,7 @@ export default function Admin() {
             
             // Save settings if on settings tab
             if (activeTab === 'settings') {
-                const settingsRes = await fetch('http://localhost:5000/api/settings', {
+                const settingsRes = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/settings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ export default function Admin() {
                 }
             } else {
                 // Save content for other tabs
-                const res = await fetch('http://localhost:5000/api/content', {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/content`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

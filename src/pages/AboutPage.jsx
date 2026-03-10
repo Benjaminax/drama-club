@@ -47,7 +47,7 @@ function AboutPage() {
   useCounterAnimation()
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/content')
+    fetch(`${import.meta.env.VITE_API_URL || '/api'}/content`)
       .then(res => res.json())
       .then(res => {
         if (res.success && res.data) {

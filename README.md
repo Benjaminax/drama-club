@@ -135,14 +135,44 @@ Check server health status
 
 ## Deployment
 
-### Frontend (Vercel/Netlify)
-1. Build the project: `npm run build`
-2. Deploy the `dist` folder
+### Vercel (Recommended) ⚡
 
-### Backend (Railway/Render/Heroku)
-1. Push `server.js` and dependencies
-2. Set environment variables
-3. Deploy with Node.js runtime
+This project is optimized for Vercel deployment with automatic environment variable configuration.
+
+**Quick Deploy:**
+1. Push your code to GitHub
+2. Import project in [Vercel Dashboard](https://vercel.com)
+3. Configure environment variables (see below)
+4. Deploy!
+
+**Detailed Instructions:** See [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md) for step-by-step guide.
+
+**Environment Variables for Production:**
+```env
+# Backend
+MONGODB_URI=your-mongodb-atlas-connection-string
+JWT_SECRET=your-secret-key
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-gmail-app-password
+BASE_URL=https://your-backend.vercel.app
+WEBSITE_URL=https://your-frontend.vercel.app
+
+# Frontend
+VITE_API_URL=https://your-backend.vercel.app
+```
+
+### Alternative Deployment Options
+
+**Frontend:**
+- Vercel (recommended)
+- Netlify
+- GitHub Pages
+
+**Backend:**
+- Vercel Serverless Functions (configured via `vercel.json`)
+- Railway
+- Render
+- Heroku
 
 ## Contributing
 
