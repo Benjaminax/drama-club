@@ -1,0 +1,736 @@
+/* ============================================================
+   AMD CLUB — Professional CSS
+   Google Fonts loaded in index.html:
+   - Playfair Display (serif headings)
+   - Outfit (body / sans)
+   ============================================================ */
+
+/* ── Base ─────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Apply Playfair for all serif usage */
+.font-serif,
+h1.font-serif,
+h2.font-serif,
+h3.font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+/* ── Selection highlight ─────────────────────────────────── */
+::selection {
+  background: rgba(202, 138, 4, 0.35);
+  color: #fef3c7;
+}
+
+/* ── Custom Scrollbar ────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0c0a09;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #78350f, #ca8a04);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #92400e, #eab308);
+}
+
+/* ── Focus visible ───────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgba(202, 138, 4, 0.6);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+/* Classic fade-up (existing, refined easing) */
+@keyframes fadeInUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Reveal from left / right for staggered content */
+@keyframes revealLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes revealRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scale in for cards */
+@keyframes scaleIn {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Float for ambient elements */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Curtain slide — golden bar wipes away to reveal heading */
+@keyframes curtainSlide {
+  0% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  100% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+}
+
+/* Shimmer over gradient text */
+@keyframes shimmer {
+  0% {
+    background-position: -1200px 0;
+  }
+
+  100% {
+    background-position: 1200px 0;
+  }
+}
+
+/* Subtle inner glow pulse */
+@keyframes glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 18px rgba(202, 138, 4, 0.18);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(202, 138, 4, 0.38), 0 0 50px rgba(202, 138, 4, 0.14);
+  }
+}
+
+/* Stage light sweep — slow ambient rotation */
+@keyframes stageSweep {
+  0% {
+    transform: rotate(-18deg);
+    opacity: 0.045;
+  }
+
+  50% {
+    transform: rotate(18deg);
+    opacity: 0.07;
+  }
+
+  100% {
+    transform: rotate(-18deg);
+    opacity: 0.045;
+  }
+}
+
+/* Bokeh drift — ambient background particles */
+@keyframes bokehDrift {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.4;
+  }
+
+  33% {
+    transform: translateY(-24px) translateX(12px) scale(1.08);
+    opacity: 0.6;
+  }
+
+  66% {
+    transform: translateY(12px) translateX(-8px) scale(0.95);
+    opacity: 0.35;
+  }
+
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.4;
+  }
+}
+
+/* Nav highlight underline width */
+@keyframes underlineExpand {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+/* Hero word stagger */
+@keyframes wordReveal {
+  from {
+    opacity: 1;
+    transform: translateY(0) skewY(0deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) skewY(0deg);
+  }
+}
+
+/* Back-to-top bounce */
+@keyframes bounceUp {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Hamburger → X morphing bars */
+@keyframes barToX1 {
+  0% {
+    transform: rotate(0) translateY(0);
+  }
+
+  100% {
+    transform: rotate(45deg) translateY(7px);
+  }
+}
+
+@keyframes barToX2 {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes barToX3 {
+  0% {
+    transform: rotate(0) translateY(0);
+  }
+
+  100% {
+    transform: rotate(-45deg) translateY(-7px);
+  }
+}
+
+
+/* ============================================================
+   SCROLL-REVEAL SYSTEM
+   Elements get data-reveal attribute; JS adds .is-visible.
+   ============================================================ */
+
+[data-reveal] {
+  opacity: 1;
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-reveal="up"] {
+  transform: translateY(0);
+}
+
+[data-reveal="left"] {
+  transform: translateX(0);
+}
+
+[data-reveal="right"] {
+  transform: translateX(0);
+}
+
+[data-reveal="scale"] {
+  transform: scale(1);
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger delay siblings automatically */
+[data-reveal]:nth-child(1) {
+  transition-delay: 0ms;
+}
+
+[data-reveal]:nth-child(2) {
+  transition-delay: 90ms;
+}
+
+[data-reveal]:nth-child(3) {
+  transition-delay: 180ms;
+}
+
+[data-reveal]:nth-child(4) {
+  transition-delay: 270ms;
+}
+
+[data-reveal]:nth-child(5) {
+  transition-delay: 360ms;
+}
+
+[data-reveal]:nth-child(6) {
+  transition-delay: 450ms;
+}
+
+/* ── Utility animation classes ───────────────────────────── */
+.animate-fadeIn {
+  animation: fadeIn 0.9s ease-out both;
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.8s ease-out both;
+}
+
+.fade-in {
+  animation: fadeIn 1.0s ease-out both;
+}
+
+.float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+
+/* ============================================================
+   HERO — STAGGERED WORD REVEAL
+   ============================================================ */
+.hero-word {
+  display: inline-block;
+  opacity: 1;
+  animation: wordReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-word:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.hero-word:nth-child(2) {
+  animation-delay: 0.22s;
+}
+
+.hero-word:nth-child(3) {
+  animation-delay: 0.34s;
+}
+
+.hero-word:nth-child(4) {
+  animation-delay: 0.46s;
+}
+
+
+/* ============================================================
+   STAGE LIGHT (hero ambient)
+   ============================================================ */
+.stage-light {
+  position: absolute;
+  top: -20%;
+  width: 260px;
+  height: 700px;
+  border-radius: 0 0 50% 50%;
+  background: linear-gradient(180deg, rgba(202, 138, 4, 0.12) 0%, transparent 80%);
+  pointer-events: none;
+  animation: stageSweep 10s ease-in-out infinite;
+}
+
+.stage-light-left {
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.stage-light-right {
+  right: 15%;
+  animation-delay: 5s;
+  transform: scaleX(-1);
+}
+
+
+/* ============================================================
+   BOKEH / AMBIENT PARTICLES
+   ============================================================ */
+.bokeh-dot {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(202, 138, 4, 0.5), transparent 70%);
+  animation: bokehDrift linear infinite;
+}
+
+
+/* ============================================================
+   CURTAIN HEADING REVEAL
+   The h2 wrapper gets .curtain-wrap; JS adds .curtain-open
+   ============================================================ */
+.curtain-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.curtain-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -4px -2px;
+  background: #ca8a04;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.7s cubic-bezier(0.76, 0, 0.24, 1);
+  pointer-events: none;
+  border-radius: 2px;
+}
+
+.curtain-wrap.curtain-open::after {
+  transform: scaleX(0);
+  transform-origin: right center;
+}
+
+
+/* ============================================================
+   NAV
+   ============================================================ */
+
+/* Active nav link */
+.nav-link-active {
+  color: #fef3c7 !important;
+}
+
+.nav-link-active span {
+  width: 100% !important;
+}
+
+
+/* ============================================================
+   HAMBURGER (mobile)
+   ============================================================ */
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+@media (min-width: 1024px) {
+  .hamburger {
+    display: none !important;
+  }
+}
+
+.hamburger .bar {
+  width: 24px;
+  height: 2px;
+  background: #fef3c7;
+  border-radius: 2px;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburger.open .bar:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.open .bar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburger.open .bar:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* Mobile nav drawer */
+.mobile-nav {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease;
+  opacity: 0;
+}
+
+.mobile-nav.open {
+  max-height: 400px;
+  opacity: 1;
+}
+
+
+/* ============================================================
+   CARD HOVER (refined)
+   ============================================================ */
+.card-hover {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(202, 138, 4, 0.12);
+}
+
+
+/* ============================================================
+   SHIMMER / GRADIENT TEXT
+   ============================================================ */
+.shimmer-text {
+  background: linear-gradient(90deg,
+      #fef3c7 0%, #fcd34d 25%, #f59e0b 50%, #fcd34d 75%, #fef3c7 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 5s linear infinite;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+/* ============================================================
+   GLOW (button / CTA)
+   ============================================================ */
+.glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+
+/* ============================================================
+   BTN RIPPLE
+   ============================================================ */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.btn-ripple:hover::after {
+  opacity: 1;
+}
+
+
+/* ============================================================
+   DECORATIVE HEADING LINES
+   ============================================================ */
+.decorative-line {
+  position: relative;
+  display: inline-block;
+}
+
+.decorative-line::before,
+.decorative-line::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #ca8a04, transparent);
+  opacity: 0.6;
+}
+
+.decorative-line::before {
+  left: -68px;
+}
+
+.decorative-line::after {
+  right: -68px;
+}
+
+
+/* ============================================================
+   IMAGE OVERLAY
+   ============================================================ */
+.image-overlay {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(202, 138, 4, 0.18), rgba(120, 53, 15, 0.18));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.image-overlay:hover::before {
+  opacity: 1;
+}
+
+
+/* ============================================================
+   BACK TO TOP BUTTON
+   ============================================================ */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 99;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #92400e, #ca8a04);
+  border: 1px solid rgba(202, 138, 4, 0.4);
+  color: #fef3c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.35s ease, transform 0.35s ease, box-shadow 0.3s ease;
+  pointer-events: none;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  animation: bounceUp 2.5s ease-in-out infinite;
+}
+
+.back-to-top:hover {
+  box-shadow: 0 12px 32px rgba(202, 138, 4, 0.4);
+  animation: none;
+  transform: translateY(-3px);
+}
+
+
+/* ============================================================
+   COUNTER — number count-up support
+   ============================================================ */
+.stat-number {
+  font-variant-numeric: tabular-nums;
+  transition: all 0.1s linear;
+}
+
+
+/* ============================================================
+   SECTION SPACING HELPER
+   ============================================================ */
+.section-padding {
+  padding-top: 5.5rem;
+  padding-bottom: 5.5rem;
+}
+
+@media (min-width: 768px) {
+  .section-padding {
+    padding-top: 8rem;
+    padding-bottom: 8rem;
+  }
+}
+
+
+/* ============================================================
+   PROFESSIONAL BUTTON BASE
+   ============================================================ */
+.btn-professional {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: 6px;
+  text-transform: uppercase;
+  font-size: 0.8125rem;
+}
+
+.btn-professional:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+
+/* ============================================================
+   BACKDROP BLUR FALLBACK
+   ============================================================ */
+@supports (backdrop-filter: blur(12px)) {
+  .backdrop-blur-custom {
+    backdrop-filter: blur(12px) saturate(160%);
+  }
+}
