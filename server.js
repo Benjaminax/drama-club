@@ -39,12 +39,17 @@ const transporter = nodemailer.createTransport({
 
 // Skip email verification in production - verify only when actually sending
 if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
-  console.log(`📧 Email configured: ${process.env.EMAIL_USER}`);
-  console.log('📧 Email notifications will be sent in background');
+  console.log('📧 Email Configuration:');
+  console.log(`📧   Service: ${process.env.EMAIL_SERVICE || 'gmail'}`);
+  console.log(`📧   User: ${process.env.EMAIL_USER}`);
+  console.log(`📧   Password: ${process.env.EMAIL_PASSWORD ? '****' + process.env.EMAIL_PASSWORD.slice(-4) : 'NOT SET'}`);
+  console.log(`📧   Recipient: ${process.env.EMAIL_RECIPIENT || process.env.EMAIL_USER}`);
+  console.log('📧 Email notifications ENABLED - will send in background');
   // Don't verify on startup - it can timeout and block deployment
   // Verification happens when actually sending emails
 } else {
   console.log('⚠️  Email not configured. Set EMAIL_USER and EMAIL_PASSWORD in .env file');
+  console.log('⚠️  Contact form will save to database but NOT send email notifications');
 }
 
 // Configure Cloudinary
@@ -366,8 +371,20 @@ app.post('/api/contact', async (req, res) => {
           const settings = await Settings.findOne();
           const adminEmail = settings?.emailRecipient || process.env.EMAIL_RECIPIENT || process.env.EMAIL_USER;
           
-          console.log(`📧 [Background] Sending email notification for: ${name} (${email})`);
+          console.log(`📧 [Background] Starting email send process...`);
+          console.log(`📧 [Background] Contact form submitted by: ${name} (${email})`);
           console.log(`📧 [Background] Admin recipient: ${adminEmail}`);
+          console.log(`📧 [Background] Email service: ${process.env.EMAIL_SERVICE || 'gmail'}`);
+          console.log(`📧 [Background] Sender: ${process.env.EMAIL_USER}`);
+
+          // Verify connection before sending
+          try {
+            await transporter.verify();
+            console.log(`✅ [Background] SMTP connection verified successfully`);
+          } catch (verifyError) {
+            console.error(`❌ [Background] SMTP verification failed:`, verifyError.message);
+            throw verifyError;
+          }
 
           // Email to admin
           const adminMailOptions = {
@@ -485,24 +502,31 @@ app.post('/api/contact', async (req, res) => {
           };
 
           // Send admin email
-          await transporter.sendMail(adminMailOptions);
-          console.log(`✅ [Background] Admin notification sent to: ${adminEmail}`);
+          console.log(`📧 [Background] Sending admin notification...`);
+          const adminInfo = await transporter.sendMail(adminMailOptions);
+          console.log(`✅ [Background] Admin notification sent successfully!`);
+          console.log(`✅ [Background] Message ID: ${adminInfo.messageId}`);
+          console.log(`✅ [Background] Sent to: ${adminEmail}`);
           
           // Send user confirmation email
-          await transporter.sendMail(userMailOptions);
-          console.log(`✅ [Background] Confirmation email sent to: ${email}`);
+          console.log(`📧 [Background] Sending user confirmation...`);
+          const userInfo = await transporter.sendMail(userMailOptions);
+          console.log(`✅ [Background] User confirmation sent successfully!`);
+          console.log(`✅ [Background] Message ID: ${userInfo.messageId}`);
+          console.log(`✅ [Background] Sent to: ${email}`);
           
         } catch (emailError) {
-          console.error('❌ [Background] Email send failed:', emailError.message);
-          console.error('❌ [Background] Error details:', {
-            code: emailError.code,
-            command: emailError.command,
-            response: emailError.response
-          });
+          console.error('❌ [Background] Email send FAILED!');
+          console.error('❌ [Background] Error message:', emailError.message);
+          console.error('❌ [Background] Error code:', emailError.code);
+          console.error('❌ [Background] Command:', emailError.command);
+          console.error('❌ [Background] Response:', emailError.response);
+          console.error('❌ [Background] Stack:', emailError.stack);
         }
       });
     } else {
       console.log('⚠️  Email not configured - skipping notifications');
+      console.log('⚠️  Set EMAIL_USER and EMAIL_PASSWORD environment variables');
     }
   } catch (error) {
     console.error('Error saving contact:', error);
