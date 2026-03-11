@@ -48,17 +48,56 @@ function TertuliaPage() {
             </p>
           </div>
           
-          <div data-reveal="up" className="bg-stone-900/60 backdrop-blur-md rounded-2xl p-12 border border-amber-900/20 shadow-2xl mb-16 max-w-4xl mx-auto">
-            <p className="text-amber-100 text-lg leading-relaxed font-light mb-8 text-center">
-              Tertulia is where conversations about theatre, media, and visual arts come alive.
-              Join us for discussions, workshops, and collaborative sessions that fuel creativity and innovation.
-            </p>
-            <div className="text-center">
-              <button className="bg-yellow-600 hover:bg-yellow-500 text-stone-900 px-10 py-3.5 rounded-full font-bold transition-all duration-300 shadow-lg shadow-black/30 text-sm tracking-widest uppercase btn-ripple glow hover:-translate-y-0.5 hover:shadow-yellow-600/30">
-                Learn More About Tertulia
-              </button>
+          {/* Rich Article Content */}
+          {content.tertuliaContent && content.tertuliaContent.length > 0 ? (
+            <div data-reveal="up" className="bg-stone-900/60 backdrop-blur-md rounded-2xl p-10 md:p-12 border border-amber-900/20 shadow-2xl mb-16 max-w-4xl mx-auto">
+              <div className="space-y-8">
+                {content.tertuliaContent.map((block, idx) => (
+                  <div key={idx}>
+                    {block.type === 'text' ? (
+                      <p className="text-amber-100 text-lg leading-relaxed font-light">
+                        {block.content}
+                      </p>
+                    ) : block.type === 'image' && block.url ? (
+                      <div className="my-8">
+                        <img 
+                          src={block.url} 
+                          alt={block.caption || 'Tertulia content'} 
+                          className="w-full rounded-xl shadow-2xl border border-amber-900/30"
+                        />
+                        {block.caption && (
+                          <p className="text-amber-100/60 text-sm text-center mt-3 italic">{block.caption}</p>
+                        )}
+                      </div>
+                    ) : block.type === 'video' && block.url ? (
+                      <div className="my-8">
+                        <video 
+                          src={block.url} 
+                          controls 
+                          className="w-full rounded-xl shadow-2xl border border-amber-900/30 bg-black"
+                        />
+                        {block.caption && (
+                          <p className="text-amber-100/60 text-sm text-center mt-3 italic">{block.caption}</p>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div data-reveal="up" className="bg-stone-900/60 backdrop-blur-md rounded-2xl p-12 border border-amber-900/20 shadow-2xl mb-16 max-w-4xl mx-auto">
+              <p className="text-amber-100 text-lg leading-relaxed font-light mb-8 text-center">
+                Tertulia is where conversations about theatre, media, and visual arts come alive.
+                Join us for discussions, workshops, and collaborative sessions that fuel creativity and innovation.
+              </p>
+              <div className="text-center">
+                <button className="bg-yellow-600 hover:bg-yellow-500 text-stone-900 px-10 py-3.5 rounded-full font-bold transition-all duration-300 shadow-lg shadow-black/30 text-sm tracking-widest uppercase btn-ripple glow hover:-translate-y-0.5 hover:shadow-yellow-600/30">
+                  Learn More About Tertulia
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Media Gallery */}
           {content.tertuliaMedia && content.tertuliaMedia.length > 0 && (

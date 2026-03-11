@@ -312,7 +312,7 @@ function Home() {
         {/* Hero background image — dramatic theatre stage */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1507924538820-ede94a04019d?auto=format&fit=crop&w=1920&q=80')" }}
+          style={{ backgroundImage: `url('${content.heroBackgroundImage || 'https://images.unsplash.com/photo-1507924538820-ede94a04019d?auto=format&fit=crop&w=1920&q=80'}')` }}
         />
         {/* Overlay — keep text readable */}
         <div className="absolute inset-0 bg-linear-to-b from-black/80 via-stone-950/85 to-stone-900/90" />
@@ -356,6 +356,43 @@ function Home() {
           <p className="text-lg md:text-xl text-amber-100 mb-14 font-light max-w-2xl mx-auto leading-relaxed fade-in-up" style={{ animationDelay: '0.65s' }}>
             {content.heroDescription}
           </p>
+
+          {/* Rich Content Blocks */}
+          {content.heroContent && content.heroContent.length > 0 && (
+            <div className="max-w-4xl mx-auto mb-14 space-y-8 fade-in-up" style={{ animationDelay: '0.7s' }}>
+              {content.heroContent.map((block, idx) => (
+                <div key={idx} data-reveal="up">
+                  {block.type === 'text' ? (
+                    <p className="text-amber-100 text-lg leading-relaxed font-light text-center">
+                      {block.content}
+                    </p>
+                  ) : block.type === 'image' && block.url ? (
+                    <div className="rounded-xl overflow-hidden border border-amber-900/30 shadow-2xl">
+                      <img 
+                        src={block.url} 
+                        alt={block.caption || 'Hero content'} 
+                        className="w-full h-auto"
+                      />
+                      {block.caption && (
+                        <p className="text-amber-100/70 text-sm text-center py-3 bg-stone-900/50">{block.caption}</p>
+                      )}
+                    </div>
+                  ) : block.type === 'video' && block.url ? (
+                    <div className="rounded-xl overflow-hidden border border-amber-900/30 shadow-2xl">
+                      <video 
+                        src={block.url} 
+                        controls 
+                        className="w-full h-auto bg-black"
+                      />
+                      {block.caption && (
+                        <p className="text-amber-100/70 text-sm text-center py-3 bg-stone-900/50">{block.caption}</p>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="flex gap-5 justify-center flex-wrap mb-16 fade-in-up" style={{ animationDelay: '0.78s' }}>
             <a
