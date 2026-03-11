@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 5000;
 // Resend is free (100 emails/day) and works perfectly from cloud hosting
 // Sign up at https://resend.com and get API key
 
-const sendEmail = async (to, subject, html) => {
+const sendEmail = async (mailOptions) => {
   if (process.env.RESEND_API_KEY) {
     // Use Resend API (cloud-friendly)
     const response = await fetch('https://api.resend.com/emails', {
@@ -35,9 +35,9 @@ const sendEmail = async (to, subject, html) => {
       },
       body: JSON.stringify({
         from: process.env.EMAIL_FROM || 'AMD Club <onboarding@resend.dev>',
-        to: to,
-        subject: subject,
-        html: html
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+        html: mailOptions.html
       })
     });
     
@@ -61,9 +61,9 @@ const sendEmail = async (to, subject, html) => {
     
     return await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: to,
-      subject: subject,
-      html: html
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      html: mailOptions.html
     });
   }
 };
