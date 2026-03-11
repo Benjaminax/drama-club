@@ -61,7 +61,10 @@ Click **Add Environment Variable** for each one:
 
 **Variable 8:**
 - Key: `BASE_URL`
-- Value: `https://drama-club-api.onrender.com` (update with your actual Render URL after deployment)
+- Value: `https://drama-club.onrender.com`
+  - **IMPORTANT**: This must match your Render backend URL exactly!
+  - This is used for file upload URLs (images/videos)
+  - If you see localhost URLs when uploading, this variable is not set correctly
 
 ---
 
