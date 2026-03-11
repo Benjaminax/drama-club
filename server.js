@@ -322,6 +322,10 @@ app.post('/api/contact', async (req, res) => {
         // Get email recipient from settings
         const settings = await Settings.findOne();
         const adminEmail = settings?.emailRecipient || process.env.EMAIL_RECIPIENT || process.env.EMAIL_USER;
+        
+        console.log(`📧 Attempting to send email notification...`);
+        console.log(`📧 Admin email recipient: ${adminEmail}`);
+        console.log(`📧 Sender: ${process.env.EMAIL_USER}`);
 
         // Email to admin
         const adminMailOptions = {
@@ -440,13 +444,21 @@ app.post('/api/contact', async (req, res) => {
 
         // Send both emails
         await transporter.sendMail(adminMailOptions);
+        console.log(`✅ Admin notification email sent to: ${adminEmail}`);
+        
         await transporter.sendMail(userMailOptions);
+        console.log(`✅ Confirmation email sent to: ${email}`);
         
         console.log(`📧 Emails sent successfully to admin and ${email}`);
       } catch (emailError) {
         console.error('❌ Error sending email:', emailError.message);
+        console.error('❌ Full error:', emailError);
+        console.error('❌ Email config - User:', process.env.EMAIL_USER);
+        console.error('❌ Email config - Service:', process.env.EMAIL_SERVICE);
         // Don't fail the request if email fails
       }
+    } else {
+      console.log('⚠️  Email not sent - EMAIL_USER or EMAIL_PASSWORD not configured');
     }
 
     res.status(201).json({
