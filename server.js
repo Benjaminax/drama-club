@@ -3,11 +3,12 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
-import fs from 'fs';
 import path from 'path';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -41,27 +42,41 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
   console.log('⚠️  Email not configured. Set EMAIL_USER and EMAIL_PASSWORD in .env file');
 }
 
-// Setup multer for uploading media
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Verify Cloudinary configuration
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  console.log('✅ Cloudinary configured successfully');
+} else {
+  console.log('⚠️  Cloudinary not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in .env file');
 }
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
+
+// Setup multer with Cloudinary storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'drama-club', // Folder name in Cloudinary
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'mov', 'avi'],
+    resource_type: 'auto', // Automatically detect if it's image or video
   },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB max file size
   }
 });
-const upload = multer({ storage: storage });
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(uploadDir)); // Serve static files from the uploads directory
 
 // MongoDB Connection
 const connectDB = async () => {
@@ -115,6 +130,21 @@ const settingsSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 const Settings = mongoose.model('Settings', settingsSchema);
+
+// Media Schema for images/video collection
+const mediaSchema = new mongoose.Schema({
+  filename: { type: String, required: true },
+  cloudinaryUrl: { type: String, required: true },
+  cloudinaryPublicId: { type: String, required: true },
+  resourceType: { type: String, enum: ['image', 'video', 'raw'], default: 'image' },
+  format: { type: String },
+  size: { type: Number }, // Size in bytes
+  width: { type: Number },
+  height: { type: Number },
+  uploadedBy: { type: String, default: 'admin' },
+  createdAt: { type: Date, default: Date.now }
+});
+const Media = mongoose.model('Media', mediaSchema, 'images/video'); // Use 'images/video' as collection name
 
 // Content Schema
 const contentSchema = new mongoose.Schema({
@@ -519,13 +549,85 @@ app.post('/api/settings', authMiddleware, async (req, res) => {
 });
 
 // === Upload Media Endpoint ===
-app.post('/api/upload', authMiddleware, upload.single('media'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, message: 'No file uploaded' });
+app.post('/api/upload', authMiddleware, upload.single('media'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    
+    // Cloudinary automatically provides the secure URL
+    const fileUrl = req.file.path; // This is the Cloudinary URL
+    
+    // Save file metadata to MongoDB
+    const mediaDoc = new Media({
+      filename: req.file.originalname,
+      cloudinaryUrl: fileUrl,
+      cloudinaryPublicId: req.file.filename, // Cloudinary public ID
+      resourceType: req.file.resource_type || 'image',
+      format: req.file.format,
+      size: req.file.size,
+      width: req.file.width,
+      height: req.file.height
+    });
+    
+    await mediaDoc.save();
+    console.log('✅ File uploaded and saved to MongoDB:', fileUrl);
+    
+    res.json({ 
+      success: true, 
+      url: fileUrl,
+      mediaId: mediaDoc._id,
+      metadata: {
+        filename: mediaDoc.filename,
+        resourceType: mediaDoc.resourceType,
+        format: mediaDoc.format,
+        size: mediaDoc.size
+      }
+    });
+  } catch (error) {
+    console.error('❌ Upload error:', error);
+    res.status(500).json({ success: false, message: 'Error uploading file', error: error.message });
   }
-  const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
-  const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
-  res.json({ success: true, url: fileUrl });
+});
+
+// === Get All Uploaded Media ===
+app.get('/api/media', authMiddleware, async (req, res) => {
+  try {
+    const media = await Media.find().sort({ createdAt: -1 });
+    res.json({ success: true, data: media });
+  } catch (error) {
+    console.error('Error fetching media:', error);
+    res.status(500).json({ success: false, message: 'Error fetching media' });
+  }
+});
+
+// === Delete Media ===
+app.delete('/api/media/:id', authMiddleware, async (req, res) => {
+  try {
+    const media = await Media.findById(req.params.id);
+    if (!media) {
+      return res.status(404).json({ success: false, message: 'Media not found' });
+    }
+    
+    // Delete from Cloudinary
+    try {
+      await cloudinary.uploader.destroy(media.cloudinaryPublicId, { 
+        resource_type: media.resourceType 
+      });
+      console.log('✅ Deleted from Cloudinary:', media.cloudinaryPublicId);
+    } catch (cloudinaryError) {
+      console.error('⚠️  Cloudinary deletion error:', cloudinaryError.message);
+    }
+    
+    // Delete from MongoDB
+    await Media.findByIdAndDelete(req.params.id);
+    console.log('✅ Deleted from MongoDB:', media.filename);
+    
+    res.json({ success: true, message: 'Media deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting media:', error);
+    res.status(500).json({ success: false, message: 'Error deleting media' });
+  }
 });
 
 // Connect to database and start server
