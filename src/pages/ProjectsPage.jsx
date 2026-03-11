@@ -37,7 +37,7 @@ function ProjectsPage() {
         <div className="absolute inset-0 bg-stone-950/88" />
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Our Work</p>
+            <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">{content.pageSubtitle_projects || 'Our Work'}</p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
               <span className="curtain-wrap">{content.pageTitle_projects || 'Productions'}</span>
             </h2>

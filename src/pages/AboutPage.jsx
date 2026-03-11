@@ -78,7 +78,7 @@ function AboutPage() {
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">
-              {content.aboutSubtitle || 'Who We Are'}
+              {content.pageSubtitle_about || content.aboutSubtitle || 'Who We Are'}
             </p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
               <span className="curtain-wrap">{content.pageTitle_about || 'About AMD Club'}</span>

@@ -50,7 +50,7 @@ function ContactPage() {
       <section className="py-28 px-6 bg-black/40 relative overflow-hidden min-h-screen">
         <div className="max-w-3xl mx-auto relative z-10">
           <div className="text-center mb-14">
-            <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Get In Touch</p>
+            <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">{content?.pageSubtitle_contact || 'Get In Touch'}</p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
               <span className="curtain-wrap">{content?.pageTitle_contact || 'Contact Us'}</span>
             </h2>
@@ -59,7 +59,7 @@ function ContactPage() {
 
           <div data-reveal="up" className="bg-stone-900/60 backdrop-blur-md rounded-2xl p-10 shadow-2xl border border-amber-900/20">
             <p className="text-amber-100 text-center mb-8 font-light text-lg">
-              Interested in joining our club or have questions? Send us a message!
+              {content?.contactIntro || 'Interested in joining our club or have questions? Send us a message!'}
             </p>
 
             {submitStatus.message && (

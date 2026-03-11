@@ -536,29 +536,90 @@ export default function Admin() {
                                     supportVideo={true}
                                 />
 
-                                <div className="pt-6 border-t border-slate-800/50">
-                                    <h3 className="text-sm font-semibold text-slate-200 mb-5">Page Titles</h3>
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                        {[
-                                            { name: 'pageTitle_about', label: 'About Page', default: 'About Us' },
-                                            { name: 'pageTitle_projects', label: 'Productions Page', default: 'Productions' },
-                                            { name: 'pageTitle_team', label: 'Team Page', default: 'Our Team' },
-                                            { name: 'pageTitle_gallery', label: 'Gallery Page', default: 'Gallery' },
-                                            { name: 'pageTitle_tertulia', label: 'Tertulia Page', default: 'Tertulia Sessions' },
-                                            { name: 'pageTitle_contact', label: 'Contact Page', default: 'Contact Us' }
-                                        ].map(field => (
-                                            <div key={field.name}>
-                                                <label className="block text-xs font-medium text-slate-400 mb-2">{field.label}</label>
+                                <div className="pt-6 border-t border-slate-800/50 space-y-6">
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-slate-200 mb-2">Organization Name</h3>
+                                        <p className="text-xs text-slate-400 mb-3">Displayed in header badge on homepage</p>
+                                        <input 
+                                            type="text" 
+                                            name="organizationName" 
+                                            value={content.organizationName || 'Academic City University'} 
+                                            onChange={handleChange} 
+                                            placeholder="Academic City University" 
+                                            className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50" 
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-slate-200 mb-2">Button Labels</h3>
+                                        <div className="grid md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-medium text-slate-400 mb-2">Primary CTA Button</label>
                                                 <input 
                                                     type="text" 
-                                                    name={field.name} 
-                                                    value={content[field.name] || field.default} 
+                                                    name="btnPrimaryCTA" 
+                                                    value={content.btnPrimaryCTA || 'Discover More'} 
                                                     onChange={handleChange} 
-                                                    placeholder={field.default} 
+                                                    placeholder="Discover More" 
                                                     className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50" 
                                                 />
                                             </div>
-                                        ))}
+                                            <div>
+                                                <label className="block text-xs font-medium text-slate-400 mb-2">Secondary CTA Button</label>
+                                                <input 
+                                                    type="text" 
+                                                    name="btnSecondaryCTA" 
+                                                    value={content.btnSecondaryCTA || 'View Productions'} 
+                                                    onChange={handleChange} 
+                                                    placeholder="View Productions" 
+                                                    className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50" 
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-slate-200 mb-3">Page Titles & Subtitles</h3>
+                                        <div className="grid md:grid-cols-2 gap-4">
+                                            {[
+                                                { name: 'pageTitle_about', label: 'About Page Title', default: 'About Us' },
+                                                { name: 'pageSubtitle_about', label: 'About Page Subtitle', default: 'Who We Are' },
+                                                { name: 'pageTitle_projects', label: 'Productions Page Title', default: 'Productions' },
+                                                { name: 'pageSubtitle_projects', label: 'Productions Page Subtitle', default: 'Our Work' },
+                                                { name: 'pageTitle_team', label: 'Team Page Title', default: 'Our Team' },
+                                                { name: 'pageSubtitle_team', label: 'Team Page Subtitle', default: 'Meet The Team' },
+                                                { name: 'pageTitle_gallery', label: 'Gallery Page Title', default: 'Gallery' },
+                                                { name: 'pageSubtitle_gallery', label: 'Gallery Page Subtitle', default: 'Captured Moments' },
+                                                { name: 'pageTitle_tertulia', label: 'Tertulia Page Title', default: 'Tertulia Sessions' },
+                                                { name: 'pageSubtitle_tertulia', label: 'Tertulia Page Subtitle', default: 'Weekly Meetings' },
+                                                { name: 'pageTitle_contact', label: 'Contact Page Title', default: 'Contact Us' },
+                                                { name: 'pageSubtitle_contact', label: 'Contact Page Subtitle', default: 'Get In Touch' }
+                                            ].map(field => (
+                                                <div key={field.name}>
+                                                    <label className="block text-xs font-medium text-slate-400 mb-2">{field.label}</label>
+                                                    <input 
+                                                        type="text" 
+                                                        name={field.name} 
+                                                        value={content[field.name] || field.default} 
+                                                        onChange={handleChange} 
+                                                        placeholder={field.default} 
+                                                        className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50" 
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-slate-200 mb-2">Contact Page Intro</h3>
+                                        <textarea
+                                            name="contactIntro"
+                                            value={content.contactIntro || 'Interested in joining our club or have questions? Send us a message!'}
+                                            onChange={handleChange}
+                                            rows={2}
+                                            placeholder="Interested in joining our club or have questions? Send us a message!"
+                                            className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 resize-none"
+                                        />
                                     </div>
                                 </div>
                             </div>

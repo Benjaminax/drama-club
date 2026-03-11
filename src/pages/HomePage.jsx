@@ -60,7 +60,7 @@ function HomePage() {
         <div className="max-w-6xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center gap-2.5 mb-8 px-5 py-2.5 bg-amber-900/20 backdrop-blur-md border border-amber-600/25 rounded-full fade-in-up" style={{ animationDelay: '0.1s' }}>
             <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-            <p className="text-yellow-600 text-xs tracking-[0.28em] font-bold uppercase">Academic City University</p>
+            <p className="text-yellow-600 text-xs tracking-[0.28em] font-bold uppercase">{content.organizationName || 'Academic City University'}</p>
           </div>
 
           <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-serif font-light mb-8 tracking-tight text-amber-100 leading-[1.1] overflow-hidden">
@@ -93,13 +93,13 @@ function HomePage() {
               to="/about"
               className="bg-yellow-600 hover:bg-yellow-500 text-stone-900 px-10 py-3.5 rounded-lg text-sm font-bold tracking-widest transition-all duration-300 btn-ripple hover:shadow-xl hover:shadow-yellow-600/35 hover:-translate-y-0.5 uppercase"
             >
-              Discover More
+              {content.btnPrimaryCTA || 'Discover More'}
             </Link>
             <Link
               to="/projects"
               className="bg-transparent border-2 border-amber-100/20 hover:border-yellow-600/50 text-amber-100 px-10 py-3.5 rounded-lg text-sm font-bold tracking-widest transition-all duration-300 hover:bg-stone-900/50 backdrop-blur-sm hover:-translate-y-0.5 uppercase"
             >
-              View Projects
+              {content.btnSecondaryCTA || 'View Productions'}
             </Link>
           </div>
 
