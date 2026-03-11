@@ -527,6 +527,57 @@ app.get('/api/contacts', async (req, res) => {
   }
 });
 
+// Test email endpoint (for debugging)
+app.post('/api/test-email', authMiddleware, async (req, res) => {
+  try {
+    console.log('📧 Testing email configuration...');
+    
+    const settings = await Settings.findOne();
+    const adminEmail = settings?.emailRecipient || process.env.EMAIL_RECIPIENT || process.env.EMAIL_USER;
+    
+    console.log(`📧 Sending test email to: ${adminEmail}`);
+    
+    const testMailOptions = {
+      from: process.env.EMAIL_USER,
+      to: adminEmail,
+      subject: '✅ Test Email - AMD Club',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #fbbf24;">Email Test Successful! 🎉</h2>
+          <p>Your email configuration is working correctly.</p>
+          <p><strong>From:</strong> ${process.env.EMAIL_USER}</p>
+          <p><strong>To:</strong> ${adminEmail}</p>
+          <p><strong>Service:</strong> ${process.env.EMAIL_SERVICE || 'gmail'}</p>
+          <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+        </div>
+      `
+    };
+    
+    await transporter.sendMail(testMailOptions);
+    console.log('✅ Test email sent successfully!');
+    
+    res.json({ 
+      success: true, 
+      message: 'Test email sent successfully!',
+      recipient: adminEmail 
+    });
+  } catch (error) {
+    console.error('❌ Test email failed:', error.message);
+    console.error('❌ Error code:', error.code);
+    console.error('❌ Error response:', error.response);
+    
+    res.status(500).json({ 
+      success: false, 
+      message: 'Email test failed: ' + error.message,
+      error: {
+        code: error.code,
+        command: error.command,
+        response: error.response
+      }
+    });
+  }
+});
+
 app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
