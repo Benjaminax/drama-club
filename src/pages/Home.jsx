@@ -404,7 +404,7 @@ function Home() {
           <div className="text-center mb-16">
             <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Who We Are</p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
-              <span className="curtain-wrap">About AMD Club</span>
+              <span className="curtain-wrap">{content.pageTitle_about || 'About AMD Club'}</span>
             </h2>
             <div data-reveal="up" className="w-20 h-px bg-yellow-600 mx-auto" />
           </div>
@@ -454,7 +454,7 @@ function Home() {
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Weekly Meetings</p>
           <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
-            <span className="curtain-wrap">Tertulia Sessions</span>
+            <span className="curtain-wrap">{content.pageTitle_tertulia || 'Tertulia Sessions'}</span>
           </h2>
           <div data-reveal="up" className="w-20 h-px bg-yellow-600 mx-auto mb-8" />
           <p data-reveal="up" className="text-amber-100 text-xl leading-relaxed mb-8 font-light italic max-w-3xl mx-auto">
@@ -484,7 +484,7 @@ function Home() {
           <div className="text-center mb-16">
             <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Our Work</p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
-              <span className="curtain-wrap">Productions</span>
+              <span className="curtain-wrap">{content.pageTitle_projects || 'Productions'}</span>
             </h2>
             <div data-reveal="up" className="h-px w-24 bg-linear-to-r from-transparent via-yellow-600 to-transparent mx-auto" />
           </div>
@@ -534,7 +534,7 @@ function Home() {
           <div className="text-center mb-16">
             <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Captured Moments</p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
-              <span className="curtain-wrap">Gallery</span>
+              <span className="curtain-wrap">{content.pageTitle_gallery || 'Gallery'}</span>
             </h2>
             <div data-reveal="up" className="h-px w-24 bg-linear-to-r from-transparent via-yellow-600 to-transparent mx-auto" />
           </div>
@@ -573,7 +573,7 @@ function Home() {
           <div className="text-center mb-16">
             <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Meet The Team</p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
-              <span className="curtain-wrap">Our Leadership</span>
+              <span className="curtain-wrap">{content.pageTitle_team || 'Our Leadership'}</span>
             </h2>
             <div data-reveal="up" className="h-px w-24 bg-linear-to-r from-transparent via-yellow-600 to-transparent mx-auto" />
           </div>
@@ -593,7 +593,7 @@ function Home() {
           <div className="text-center mb-14">
             <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Get In Touch</p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
-              <span className="curtain-wrap">Contact Us</span>
+              <span className="curtain-wrap">{content.pageTitle_contact || 'Contact Us'}</span>
             </h2>
             <div data-reveal="up" className="h-px w-24 bg-linear-to-r from-transparent via-yellow-600 to-transparent mx-auto" />
           </div>
