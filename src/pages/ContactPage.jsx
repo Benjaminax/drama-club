@@ -1,11 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import '../App.css'
 
 function ContactPage() {
+  const [content, setContent] = useState(null)
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || '/api'}/content`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data) {
+          setContent(res.data)
+        }
+      })
+      .catch(err => console.error('Error fetching content:', err))
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -40,7 +52,7 @@ function ContactPage() {
           <div className="text-center mb-14">
             <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Get In Touch</p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
-              <span className="curtain-wrap">Contact Us</span>
+              <span className="curtain-wrap">{content?.pageTitle_contact || 'Contact Us'}</span>
             </h2>
             <div data-reveal="up" className="h-px w-24 bg-linear-to-r from-transparent via-yellow-600 to-transparent mx-auto" />
           </div>

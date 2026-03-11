@@ -267,6 +267,31 @@ export default function Admin() {
                                     className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 focus:ring-1 focus:ring-yellow-600/50 transition-all text-sm"
                                 />
                             </div>
+                            <div className="pt-6 border-t border-amber-900/20">
+                                <h3 className="text-sm font-semibold tracking-widest text-amber-100 uppercase mb-4">Page Titles</h3>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-bold tracking-widest text-amber-100/70 uppercase mb-1">About Page Title</label>
+                                        <input type="text" name="pageTitle_about" value={content.pageTitle_about || 'About Us'} onChange={handleChange} placeholder="About Us" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold tracking-widest text-amber-100/70 uppercase mb-1">Productions Page Title</label>
+                                        <input type="text" name="pageTitle_projects" value={content.pageTitle_projects || 'Productions'} onChange={handleChange} placeholder="Productions" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold tracking-widest text-amber-100/70 uppercase mb-1">Team Page Title</label>
+                                        <input type="text" name="pageTitle_team" value={content.pageTitle_team || 'Our Team'} onChange={handleChange} placeholder="Our Team" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold tracking-widest text-amber-100/70 uppercase mb-1">Gallery Page Title</label>
+                                        <input type="text" name="pageTitle_gallery" value={content.pageTitle_gallery || 'Gallery'} onChange={handleChange} placeholder="Gallery" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold tracking-widest text-amber-100/70 uppercase mb-1">Contact Page Title</label>
+                                        <input type="text" name="pageTitle_contact" value={content.pageTitle_contact || 'Contact Us'} onChange={handleChange} placeholder="Contact Us" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -331,7 +356,15 @@ export default function Admin() {
 
                     {/* TERTULIA TAB */}
                     {activeTab === 'tertulia' && (
-                        <div className="space-y-6">
+                        <div className="space-y-8">
+                            <div>
+                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-2">Page Title</label>
+                                <input
+                                    type="text" name="pageTitle_tertulia" value={content.pageTitle_tertulia || 'Tertulia Sessions'} onChange={handleChange}
+                                    placeholder="Tertulia Sessions"
+                                    className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 focus:ring-1 focus:ring-yellow-600/50 transition-all font-serif text-lg"
+                                />
+                            </div>
                             <div>
                                 <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-2">Description</label>
                                 <textarea
@@ -339,6 +372,51 @@ export default function Admin() {
                                     placeholder="Enter tertulia description..."
                                     className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 transition-all text-sm leading-relaxed"
                                 />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-4">Tertulia Media Gallery (Images & Videos)</label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {(content.tertuliaMedia || []).map((item, idx) => (
+                                        <div key={idx} className="bg-stone-800/30 border border-amber-900/30 rounded-xl overflow-hidden relative group shadow-lg">
+                                            <button onClick={() => removeArrayItem('tertuliaMedia', idx)} className="absolute z-10 top-2 right-2 w-7 h-7 flex items-center justify-center bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors">
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                            <div className="aspect-video bg-stone-950 relative overflow-hidden">
+                                                {item.url && item.url.match(/\.(mp4|webm|ogg)$/i) ? (
+                                                    <video src={item.url} autoPlay loop muted playsInline className="w-full h-full object-cover opacity-60" />
+                                                ) : (
+                                                    <>
+                                                        <img src={item.url} alt="Tertulia" className="w-full h-full object-cover opacity-60" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+                                                        <div className="absolute inset-0 hidden items-center justify-center text-amber-100/20 text-xs">Invalid URL</div>
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div className="p-4 space-y-3">
+                                                <div>
+                                                    <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Media URL (Image or Video)</label>
+                                                    <div className="flex gap-2">
+                                                        <input type="text" value={item.url || ''} onChange={(e) => handleArrayChange('tertuliaMedia', idx, 'url', e.target.value)} placeholder="https://..." className="flex-1 bg-stone-950/50 border border-amber-900/30 rounded px-2 py-1.5 text-xs text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                                        <label className="cursor-pointer flex items-center justify-center w-8 bg-stone-800 hover:bg-stone-700 border border-amber-900/30 text-amber-100 rounded transition-colors">
+                                                            <Upload className="w-3.5 h-3.5" />
+                                                            <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, 'tertuliaMedia', idx, 'url')} />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Label</label>
+                                                    <input type="text" value={item.label || ''} onChange={(e) => handleArrayChange('tertuliaMedia', idx, 'label', e.target.value)} placeholder="Media description" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-2 py-1.5 text-xs text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={() => addArrayItem('tertuliaMedia', { label: 'New Media', url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=800&q=80' })}
+                                    className="w-full mt-6 py-4 border-2 border-dashed border-amber-900/30 rounded-xl text-yellow-600 hover:bg-yellow-600/5 hover:border-yellow-600/50 transition-colors text-sm font-bold tracking-widest uppercase flex items-center justify-center gap-2"
+                                >
+                                    <Plus className="w-5 h-5" /> Add Image / Video
+                                </button>
                             </div>
                         </div>
                     )}
@@ -431,10 +509,10 @@ export default function Admin() {
                                 ))}
                             </div>
                             <button
-                                onClick={() => addArrayItem('gallery', { label: 'New Image', url: 'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=800&q=80' })}
+                                onClick={() => addArrayItem('gallery', { label: 'New Media', url: 'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=800&q=80' })}
                                 className="w-full py-4 border-2 border-dashed border-amber-900/30 rounded-xl text-yellow-600 hover:bg-yellow-600/5 hover:border-yellow-600/50 transition-colors text-sm font-bold tracking-widest uppercase flex items-center justify-center gap-2"
                             >
-                                <Plus className="w-5 h-5" /> Add Image
+                                <Plus className="w-5 h-5" /> Add Image / Video
                             </button>
                         </div>
                     )}

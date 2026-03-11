@@ -79,7 +79,7 @@ function AboutPage() {
           <div className="text-center mb-16">
             <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Who We Are</p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
-              <span className="curtain-wrap">About AMD Club</span>
+              <span className="curtain-wrap">{content.pageTitle_about || 'About AMD Club'}</span>
             </h2>
             <div data-reveal="up" className="w-20 h-px bg-yellow-600 mx-auto" />
           </div>

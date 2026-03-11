@@ -133,6 +133,14 @@ const contentSchema = new mongoose.Schema({
   team: [{ name: String, aka: String, role: String, description: String }],
   stats: [{ icon: String, count: Number, suffix: String, label: String }],
   tertuliaDescription: String,
+  tertuliaMedia: [{ label: String, url: String }],
+  // Page Titles
+  pageTitle_about: { type: String, default: "About Us" },
+  pageTitle_projects: { type: String, default: "Productions" },
+  pageTitle_team: { type: String, default: "Our Team" },
+  pageTitle_gallery: { type: String, default: "Gallery" },
+  pageTitle_tertulia: { type: String, default: "Tertulia Sessions" },
+  pageTitle_contact: { type: String, default: "Contact Us" },
   updatedAt: { type: Date, default: Date.now }
 });
 
@@ -170,7 +178,12 @@ const seedContent = async () => {
         { icon: 'Users', count: 100, suffix: '+', label: 'Members' },
         { icon: 'Trophy', count: 15, suffix: '+', label: 'Awards' },
       ],
-      tertuliaDescription: 'Our gathering space for creative minds to share ideas, discuss art, and inspire one another.'
+      tertuliaDescription: 'Our gathering space for creative minds to share ideas, discuss art, and inspire one another.',
+      tertuliaMedia: [
+        { label: 'Weekly Discussion', url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=800&q=80' },
+        { label: 'Creative Workshop', url: 'https://images.unsplash.com/photo-1574267432644-f6e0e17d8bf7?auto=format&fit=crop&w=800&q=80' },
+        { label: 'Collaborative Session', url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80' },
+      ]
     });
     console.log('Seeded initial Content data');
   }
