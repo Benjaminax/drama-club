@@ -27,21 +27,22 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASSWORD
   },
   // Add timeout settings for faster failure
-  connectionTimeout: 10000, // 10 seconds
-  greetingTimeout: 10000,
-  socketTimeout: 10000
+  connectionTimeout: 5000, // 5 seconds
+  greetingTimeout: 5000,
+  socketTimeout: 5000,
+  // Add pool and retry settings
+  pool: true,
+  maxConnections: 1,
+  rateDelta: 20000,
+  rateLimit: 5
 });
 
-// Verify email configuration
+// Skip email verification in production - verify only when actually sending
 if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
-  transporter.verify((error, success) => {
-    if (error) {
-      console.log('❌ Email configuration error:', error.message);
-      console.log('⚠️  Contact form emails will not be sent');
-    } else {
-      console.log('✅ Email server is ready to send messages');
-    }
-  });
+  console.log(`📧 Email configured: ${process.env.EMAIL_USER}`);
+  console.log('📧 Email notifications will be sent in background');
+  // Don't verify on startup - it can timeout and block deployment
+  // Verification happens when actually sending emails
 } else {
   console.log('⚠️  Email not configured. Set EMAIL_USER and EMAIL_PASSWORD in .env file');
 }
