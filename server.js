@@ -19,13 +19,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Email configuration
+// Email configuration with better timeout settings
 const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE || 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD
-  }
+  },
+  // Add timeout settings for faster failure
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 10000,
+  socketTimeout: 10000
 });
 
 // Verify email configuration
@@ -316,156 +320,159 @@ app.post('/api/contact', async (req, res) => {
 
     await newContact.save();
 
-    // Send email notification
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
-      try {
-        // Get email recipient from settings
-        const settings = await Settings.findOne();
-        const adminEmail = settings?.emailRecipient || process.env.EMAIL_RECIPIENT || process.env.EMAIL_USER;
-        
-        console.log(`📧 Attempting to send email notification...`);
-        console.log(`📧 Admin email recipient: ${adminEmail}`);
-        console.log(`📧 Sender: ${process.env.EMAIL_USER}`);
-
-        // Email to admin
-        const adminMailOptions = {
-          from: process.env.EMAIL_USER,
-          to: adminEmail,
-          subject: `🎭 New Contact Form Submission - AMD Club`,
-          html: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <style>
-                body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-                .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-                .header { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1c1917; padding: 30px; text-align: center; }
-                .header h1 { margin: 0; font-size: 24px; font-weight: bold; }
-                .content { padding: 30px; }
-                .field { margin-bottom: 20px; }
-                .label { color: #78716c; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-bottom: 5px; }
-                .value { color: #1c1917; font-size: 16px; padding: 10px; background-color: #fef3c7; border-left: 4px solid #fbbf24; border-radius: 4px; }
-                .message-box { background-color: #fef3c7; border-radius: 8px; padding: 20px; margin-top: 10px; }
-                .footer { background-color: #0c0a09; color: #fef3c7; text-align: center; padding: 20px; font-size: 12px; }
-                .icon { font-size: 40px; margin-bottom: 10px; }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <div class="header">
-                  <div class="icon">🎭</div>
-                  <h1>New Contact Form Submission</h1>
-                  <p style="margin: 10px 0 0 0; opacity: 0.9;">AMD Club Website</p>
-                </div>
-                <div class="content">
-                  <div class="field">
-                    <div class="label">From</div>
-                    <div class="value"><strong>${name}</strong></div>
-                  </div>
-                  <div class="field">
-                    <div class="label">Email</div>
-                    <div class="value"><a href="mailto:${email}" style="color: #1c1917; text-decoration: none;">${email}</a></div>
-                  </div>
-                  ${phone ? `
-                  <div class="field">
-                    <div class="label">Phone</div>
-                    <div class="value">${phone}</div>
-                  </div>
-                  ` : ''}
-                  <div class="field">
-                    <div class="label">Message</div>
-                    <div class="message-box">${message.replace(/\n/g, '<br>')}</div>
-                  </div>
-                  <div style="margin-top: 30px; padding: 15px; background-color: #f5f5f4; border-radius: 8px; text-align: center;">
-                    <p style="margin: 0; color: #78716c; font-size: 14px;">
-                      <strong>Submitted:</strong> ${new Date().toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
-                    </p>
-                  </div>
-                </div>
-                <div class="footer">
-                  <p style="margin: 0;">Academic City University - AMD Club</p>
-                  <p style="margin: 5px 0 0 0; opacity: 0.7;">Arts, Media & Drama Club</p>
-                </div>
-              </div>
-            </body>
-            </html>
-          `
-        };
-
-        // Confirmation email to user
-        const userMailOptions = {
-          from: process.env.EMAIL_USER,
-          to: email,
-          subject: '✅ Message Received - AMD Club',
-          html: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <style>
-                body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-                .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-                .header { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1c1917; padding: 30px; text-align: center; }
-                .header h1 { margin: 0; font-size: 24px; font-weight: bold; }
-                .content { padding: 30px; color: #1c1917; line-height: 1.6; }
-                .footer { background-color: #0c0a09; color: #fef3c7; text-align: center; padding: 20px; font-size: 12px; }
-                .icon { font-size: 50px; margin-bottom: 10px; }
-                .button { display: inline-block; background-color: #fbbf24; color: #1c1917; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 20px; }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <div class="header">
-                  <div class="icon">✅</div>
-                  <h1>Thank You for Contacting Us!</h1>
-                </div>
-                <div class="content">
-                  <p>Hi <strong>${name}</strong>,</p>
-                  <p>Thank you for reaching out to the AMD Club! We've successfully received your message and will get back to you as soon as possible.</p>
-                  <div style="background-color: #fef3c7; border-left: 4px solid #fbbf24; padding: 15px; margin: 20px 0; border-radius: 4px;">
-                    <p style="margin: 0; font-size: 14px;"><strong>Your Message:</strong></p>
-                    <p style="margin: 10px 0 0 0;">${message.replace(/\n/g, '<br>')}</p>
-                  </div>
-                  <p>Our team typically responds within 24-48 hours during weekdays.</p>
-                  <p>In the meantime, feel free to explore our website and learn more about our upcoming events and productions!</p>
-                  <div style="text-align: center;">
-                    <a href="${process.env.WEBSITE_URL || 'https://your-domain.vercel.app'}" class="button" style="color: #1c1917;">Visit Our Website</a>
-                  </div>
-                </div>
-                <div class="footer">
-                  <p style="margin: 0;"><strong>AMD Club</strong></p>
-                  <p style="margin: 5px 0;">Arts, Media & Drama Club</p>
-                  <p style="margin: 5px 0; opacity: 0.7;">Academic City University</p>
-                </div>
-              </div>
-            </body>
-            </html>
-          `
-        };
-
-        // Send both emails
-        await transporter.sendMail(adminMailOptions);
-        console.log(`✅ Admin notification email sent to: ${adminEmail}`);
-        
-        await transporter.sendMail(userMailOptions);
-        console.log(`✅ Confirmation email sent to: ${email}`);
-        
-        console.log(`📧 Emails sent successfully to admin and ${email}`);
-      } catch (emailError) {
-        console.error('❌ Error sending email:', emailError.message);
-        console.error('❌ Full error:', emailError);
-        console.error('❌ Email config - User:', process.env.EMAIL_USER);
-        console.error('❌ Email config - Service:', process.env.EMAIL_SERVICE);
-        // Don't fail the request if email fails
-      }
-    } else {
-      console.log('⚠️  Email not sent - EMAIL_USER or EMAIL_PASSWORD not configured');
-    }
-
+    // Respond immediately to user (don't wait for email)
     res.status(201).json({
       success: true,
       message: 'Contact form submitted successfully',
       data: newContact
     });
+
+    // Send email notifications asynchronously (non-blocking, fire and forget)
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+      setImmediate(async () => {
+        try {
+          // Get email recipient from settings
+          const settings = await Settings.findOne();
+          const adminEmail = settings?.emailRecipient || process.env.EMAIL_RECIPIENT || process.env.EMAIL_USER;
+          
+          console.log(`📧 [Background] Sending email notification for: ${name} (${email})`);
+          console.log(`📧 [Background] Admin recipient: ${adminEmail}`);
+
+          // Email to admin
+          const adminMailOptions = {
+            from: process.env.EMAIL_USER,
+            to: adminEmail,
+            subject: `🎭 New Contact Form - ${name}`,
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <style>
+                  body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+                  .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                  .header { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1c1917; padding: 30px; text-align: center; }
+                  .header h1 { margin: 0; font-size: 24px; font-weight: bold; }
+                  .content { padding: 30px; }
+                  .field { margin-bottom: 20px; }
+                  .label { color: #78716c; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-bottom: 5px; }
+                  .value { color: #1c1917; font-size: 16px; padding: 10px; background-color: #fef3c7; border-left: 4px solid #fbbf24; border-radius: 4px; }
+                  .message-box { background-color: #fef3c7; border-radius: 8px; padding: 20px; margin-top: 10px; }
+                  .footer { background-color: #0c0a09; color: #fef3c7; text-align: center; padding: 20px; font-size: 12px; }
+                  .icon { font-size: 40px; margin-bottom: 10px; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <div class="header">
+                    <div class="icon">🎭</div>
+                    <h1>New Contact Form Submission</h1>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">AMD Club Website</p>
+                  </div>
+                  <div class="content">
+                    <div class="field">
+                      <div class="label">From</div>
+                      <div class="value"><strong>${name}</strong></div>
+                    </div>
+                    <div class="field">
+                      <div class="label">Email</div>
+                      <div class="value"><a href="mailto:${email}" style="color: #1c1917; text-decoration: none;">${email}</a></div>
+                    </div>
+                    ${phone ? `
+                    <div class="field">
+                      <div class="label">Phone</div>
+                      <div class="value">${phone}</div>
+                    </div>
+                    ` : ''}
+                    <div class="field">
+                      <div class="label">Message</div>
+                      <div class="message-box">${message.replace(/\n/g, '<br>')}</div>
+                    </div>
+                    <div style="margin-top: 30px; padding: 15px; background-color: #f5f5f4; border-radius: 8px; text-align: center;">
+                      <p style="margin: 0; color: #78716c; font-size: 14px;">
+                        <strong>Submitted:</strong> ${new Date().toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="footer">
+                    <p style="margin: 0;">Academic City University - AMD Club</p>
+                    <p style="margin: 5px 0 0 0; opacity: 0.7;">Arts, Media & Drama Club</p>
+                  </div>
+                </div>
+              </body>
+              </html>
+            `
+          };
+
+          // Confirmation email to user
+          const userMailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: '✅ Message Received - AMD Club',
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <style>
+                  body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+                  .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                  .header { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1c1917; padding: 30px; text-align: center; }
+                  .header h1 { margin: 0; font-size: 24px; font-weight: bold; }
+                  .content { padding: 30px; color: #1c1917; line-height: 1.6; }
+                  .footer { background-color: #0c0a09; color: #fef3c7; text-align: center; padding: 20px; font-size: 12px; }
+                  .icon { font-size: 50px; margin-bottom: 10px; }
+                  .button { display: inline-block; background-color: #fbbf24; color: #1c1917; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 20px; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <div class="header">
+                    <div class="icon">✅</div>
+                    <h1>Thank You for Contacting Us!</h1>
+                  </div>
+                  <div class="content">
+                    <p>Hi <strong>${name}</strong>,</p>
+                    <p>Thank you for reaching out to the AMD Club! We've successfully received your message and will get back to you as soon as possible.</p>
+                    <div style="background-color: #fef3c7; border-left: 4px solid #fbbf24; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                      <p style="margin: 0; font-size: 14px;"><strong>Your Message:</strong></p>
+                      <p style="margin: 10px 0 0 0;">${message.replace(/\n/g, '<br>')}</p>
+                    </div>
+                    <p>Our team typically responds within 24-48 hours during weekdays.</p>
+                    <p>In the meantime, feel free to explore our website and learn more about our upcoming events and productions!</p>
+                    <div style="text-align: center;">
+                      <a href="${process.env.WEBSITE_URL || 'https://drama-club.vercel.app'}" class="button" style="color: #1c1917;">Visit Our Website</a>
+                    </div>
+                  </div>
+                  <div class="footer">
+                    <p style="margin: 0;"><strong>AMD Club</strong></p>
+                    <p style="margin: 5px 0;">Arts, Media & Drama Club</p>
+                    <p style="margin: 5px 0; opacity: 0.7;">Academic City University</p>
+                  </div>
+                </div>
+              </body>
+              </html>
+            `
+          };
+
+          // Send admin email
+          await transporter.sendMail(adminMailOptions);
+          console.log(`✅ [Background] Admin notification sent to: ${adminEmail}`);
+          
+          // Send user confirmation email
+          await transporter.sendMail(userMailOptions);
+          console.log(`✅ [Background] Confirmation email sent to: ${email}`);
+          
+        } catch (emailError) {
+          console.error('❌ [Background] Email send failed:', emailError.message);
+          console.error('❌ [Background] Error details:', {
+            code: emailError.code,
+            command: emailError.command,
+            response: emailError.response
+          });
+        }
+      });
+    } else {
+      console.log('⚠️  Email not configured - skipping notifications');
+    }
   } catch (error) {
     console.error('Error saving contact:', error);
     res.status(500).json({
