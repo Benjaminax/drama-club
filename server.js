@@ -19,47 +19,75 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Email configuration with better timeout settings
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // use TLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
-  },
-  // Add timeout settings for faster failure
-  connectionTimeout: 10000, // 10 seconds
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-  // Add pool and retry settings
-  pool: true,
-  maxConnections: 1,
-  rateDelta: 20000,
-  rateLimit: 5,
-  // Add TLS options to work with Gmail from cloud servers
-  tls: {
-    rejectUnauthorized: true,
-    minVersion: 'TLSv1.2'
-  },
-  // Debug option (will show in logs)
-  debug: true,
-  logger: true
-});
+// Email configuration
+// Gmail blocks cloud servers - use Resend for production
+// Resend is free (100 emails/day) and works perfectly from cloud hosting
+// Sign up at https://resend.com and get API key
 
-// Skip email verification in production - verify only when actually sending
-if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+const sendEmail = async (to, subject, html) => {
+  if (process.env.RESEND_API_KEY) {
+    // Use Resend API (cloud-friendly)
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: process.env.EMAIL_FROM || 'AMD Club <onboarding@resend.dev>',
+        to: to,
+        subject: subject,
+        html: html
+      })
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Resend API error: ${error}`);
+    }
+    
+    return await response.json();
+  } else {
+    // Use Gmail SMTP (local development only - doesn't work from Render)
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+      }
+    });
+    
+    return await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: to,
+      subject: subject,
+      html: html
+    });
+  }
+};
+
+// Email configuration status
+if (process.env.RESEND_API_KEY) {
   console.log('📧 Email Configuration:');
-  console.log(`📧   Service: ${process.env.EMAIL_SERVICE || 'gmail'}`);
+  console.log(`📧   Service: Resend API (cloud-friendly)`);
+  console.log(`📧   API Key: ****${process.env.RESEND_API_KEY.slice(-4)}`);
+  console.log(`📧   From: ${process.env.EMAIL_FROM || 'AMD Club <onboarding@resend.dev>'}`);
+  console.log(`📧 Recipient: ${process.env.EMAIL_RECIPIENT || 'kojoben29@gmail.com'}`);
+  console.log('📧 Email notifications ENABLED via Resend');
+} else if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+  console.log('📧 Email Configuration:');
+  console.log(`📧   Service: Gmail SMTP (local dev only)`);
   console.log(`📧   User: ${process.env.EMAIL_USER}`);
   console.log(`📧   Password: ${process.env.EMAIL_PASSWORD ? '****' + process.env.EMAIL_PASSWORD.slice(-4) : 'NOT SET'}`);
   console.log(`📧   Recipient: ${process.env.EMAIL_RECIPIENT || process.env.EMAIL_USER}`);
-  console.log('📧 Email notifications ENABLED - will send in background');
-  // Don't verify on startup - it can timeout and block deployment
-  // Verification happens when actually sending emails
+  console.log('⚠️  WARNING: Gmail SMTP does not work reliably from cloud servers');
+  console.log('⚠️  For production, use Resend: https://resend.com/signup');
 } else {
-  console.log('⚠️  Email not configured. Set EMAIL_USER and EMAIL_PASSWORD in .env file');
-  console.log('⚠️  Contact form will save to database but NOT send email notifications');
+  console.log('⚠️  Email not configured. Contact form will save to database but NOT send notifications');
+  console.log('⚠️  For production: Sign up at https://resend.com and set RESEND_API_KEY');
+  console.log('⚠️  For local dev: Set EMAIL_USER and EMAIL_PASSWORD');
 }
 
 // Configure Cloudinary
@@ -373,32 +401,21 @@ app.post('/api/contact', async (req, res) => {
       data: newContact
     });
 
-    // Send email notifications asynchronously (non-blocking, fire and forget)
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+    // Send email notifications asynchronously (non-blocking, fire and forget  
+    if (process.env.RESEND_API_KEY || (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD)) {
       setImmediate(async () => {
         try {
           // Get email recipient from settings
           const settings = await Settings.findOne();
-          const adminEmail = settings?.emailRecipient || process.env.EMAIL_RECIPIENT || process.env.EMAIL_USER;
+          const adminEmail = settings?.emailRecipient || process.env.EMAIL_RECIPIENT || process.env.EMAIL_USER || 'kojoben29@gmail.com';
           
           console.log(`📧 [Background] Starting email send process...`);
           console.log(`📧 [Background] Contact form submitted by: ${name} (${email})`);
           console.log(`📧 [Background] Admin recipient: ${adminEmail}`);
-          console.log(`📧 [Background] Email service: ${process.env.EMAIL_SERVICE || 'gmail'}`);
-          console.log(`📧 [Background] Sender: ${process.env.EMAIL_USER}`);
+          console.log(`📧 [Background] Using: ${process.env.RESEND_API_KEY ? 'Resend API' : 'Gmail SMTP'}`);
 
-          // Verify connection before sending
-          try {
-            await transporter.verify();
-            console.log(`✅ [Background] SMTP connection verified successfully`);
-          } catch (verifyError) {
-            console.error(`❌ [Background] SMTP verification failed:`, verifyError.message);
-            throw verifyError;
-          }
-
-          // Email to admin
+          // Admin notification email HTML
           const adminMailOptions = {
-            from: process.env.EMAIL_USER,
             to: adminEmail,
             subject: `🎭 New Contact Form - ${name}`,
             html: `
@@ -463,7 +480,6 @@ app.post('/api/contact', async (req, res) => {
 
           // Confirmation email to user
           const userMailOptions = {
-            from: process.env.EMAIL_USER,
             to: email,
             subject: '✅ Message Received - AMD Club',
             html: `
@@ -513,16 +529,16 @@ app.post('/api/contact', async (req, res) => {
 
           // Send admin email
           console.log(`📧 [Background] Sending admin notification...`);
-          const adminInfo = await transporter.sendMail(adminMailOptions);
-          console.log(`✅ [Background] Admin notification sent successfully!`);
-          console.log(`✅ [Background] Message ID: ${adminInfo.messageId}`);
+          const adminInfo = await sendEmail(adminMailOptions);
+          console.log(`✅ [Background] Admin notification sent successfully via ${process.env.RESEND_API_KEY ? 'Resend' : 'Gmail SMTP'}!`);
+          console.log(`✅ [Background] Message ID: ${adminInfo.messageId || adminInfo.id}`);
           console.log(`✅ [Background] Sent to: ${adminEmail}`);
           
           // Send user confirmation email
           console.log(`📧 [Background] Sending user confirmation...`);
-          const userInfo = await transporter.sendMail(userMailOptions);
-          console.log(`✅ [Background] User confirmation sent successfully!`);
-          console.log(`✅ [Background] Message ID: ${userInfo.messageId}`);
+          const userInfo = await sendEmail(userMailOptions);
+          console.log(`✅ [Background] User confirmation sent successfully via ${process.env.RESEND_API_KEY ? 'Resend' : 'Gmail SMTP'}!`);
+          console.log(`✅ [Background] Message ID: ${userInfo.messageId || userInfo.id}`);
           console.log(`✅ [Background] Sent to: ${email}`);
           
         } catch (emailError) {
@@ -572,22 +588,21 @@ app.post('/api/test-email', authMiddleware, async (req, res) => {
     console.log(`📧 Sending test email to: ${adminEmail}`);
     
     const testMailOptions = {
-      from: process.env.EMAIL_USER,
       to: adminEmail,
       subject: '✅ Test Email - AMD Club',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #fbbf24;">Email Test Successful! 🎉</h2>
           <p>Your email configuration is working correctly.</p>
-          <p><strong>From:</strong> ${process.env.EMAIL_USER}</p>
+          <p><strong>From:</strong> ${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'onboarding@resend.dev'}</p>
           <p><strong>To:</strong> ${adminEmail}</p>
-          <p><strong>Service:</strong> ${process.env.EMAIL_SERVICE || 'gmail'}</p>
+          <p><strong>Service:</strong> ${process.env.RESEND_API_KEY ? 'Resend API' : 'Gmail SMTP'}</p>
           <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
         </div>
       `
     };
     
-    await transporter.sendMail(testMailOptions);
+    await sendEmail(testMailOptions);
     console.log('✅ Test email sent successfully!');
     
     res.json({ 
