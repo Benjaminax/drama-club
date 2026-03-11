@@ -21,20 +21,30 @@ const PORT = process.env.PORT || 5000;
 
 // Email configuration with better timeout settings
 const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // use TLS
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD
   },
   // Add timeout settings for faster failure
-  connectionTimeout: 5000, // 5 seconds
-  greetingTimeout: 5000,
-  socketTimeout: 5000,
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
   // Add pool and retry settings
   pool: true,
   maxConnections: 1,
   rateDelta: 20000,
-  rateLimit: 5
+  rateLimit: 5,
+  // Add TLS options to work with Gmail from cloud servers
+  tls: {
+    rejectUnauthorized: true,
+    minVersion: 'TLSv1.2'
+  },
+  // Debug option (will show in logs)
+  debug: true,
+  logger: true
 });
 
 // Skip email verification in production - verify only when actually sending
