@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { LayoutDashboard, Save, Loader2, ArrowLeft, Image as ImageIcon, Users, Type, Film, Upload, LogOut, Coffee, BarChart3, X, Plus, Settings as SettingsIcon, Mail } from 'lucide-react'
+import { LayoutDashboard, Save, Loader2, ArrowLeft, Image as ImageIcon, Users, Type, Film, Upload, LogOut, Coffee, BarChart3, X, Plus, Settings as SettingsIcon, Mail, Video, ChevronDown, ChevronUp } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 
 export default function Admin() {
@@ -9,6 +9,8 @@ export default function Admin() {
     const [isSaving, setIsSaving] = useState(false)
     const [notification, setNotification] = useState('')
     const [activeTab, setActiveTab] = useState('hero')
+    const [expandedProductions, setExpandedProductions] = useState({})
+    const [expandedTeam, setExpandedTeam] = useState({})
 
     useEffect(() => {
         fetch(`${import.meta.env.VITE_API_URL || '/api'}/content`)
@@ -89,6 +91,42 @@ export default function Admin() {
         }
     }
 
+    // Nested content block handlers (for productions.content, team.bio, etc.)
+    const handleNestedContentChange = (parentArray, parentIdx, contentField, contentIdx, field, value) => {
+        const newParentArray = [...content[parentArray]]
+        const newContentArray = [...(newParentArray[parentIdx][contentField] || [])]
+        newContentArray[contentIdx] = { ...newContentArray[contentIdx], [field]: value }
+        newParentArray[parentIdx] = { ...newParentArray[parentIdx], [contentField]: newContentArray }
+        setContent({ ...content, [parentArray]: newParentArray })
+    }
+
+    const addNestedContent = (parentArray, parentIdx, contentField, emptyBlock) => {
+        const newParentArray = [...content[parentArray]]
+        const currentContent = newParentArray[parentIdx][contentField] || []
+        newParentArray[parentIdx] = { 
+            ...newParentArray[parentIdx], 
+            [contentField]: [...currentContent, emptyBlock] 
+        }
+        setContent({ ...content, [parentArray]: newParentArray })
+    }
+
+    const removeNestedContent = (parentArray, parentIdx, contentField, contentIdx) => {
+        const newParentArray = [...content[parentArray]]
+        const newContentArray = (newParentArray[parentIdx][contentField] || []).filter((_, i) => i !== contentIdx)
+        newParentArray[parentIdx] = { ...newParentArray[parentIdx], [contentField]: newContentArray }
+        setContent({ ...content, [parentArray]: newParentArray })
+    }
+
+    const moveNestedContent = (parentArray, parentIdx, contentField, contentIdx, direction) => {
+        const newParentArray = [...content[parentArray]]
+        const contentArray = [...(newParentArray[parentIdx][contentField] || [])]
+        const newIdx = direction === 'up' ? contentIdx - 1 : contentIdx + 1
+        if (newIdx < 0 || newIdx >= contentArray.length) return
+        ;[contentArray[contentIdx], contentArray[newIdx]] = [contentArray[newIdx], contentArray[contentIdx]]
+        newParentArray[parentIdx] = { ...newParentArray[parentIdx], [contentField]: contentArray }
+        setContent({ ...content, [parentArray]: newParentArray })
+    }
+
     const handleLogout = () => {
         localStorage.removeItem('adminToken')
         navigate('/login')
@@ -159,6 +197,133 @@ export default function Admin() {
             </div>
         )
     }
+
+    // Content Block Editor Component
+    const ContentBlockEditor = ({ blocks = [], onChange, onAdd, onRemove, onMove, title = "Content Blocks", supportVideo = false }) => (
+        <div className="border-t border-amber-900/20 pt-6">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold tracking-widest text-amber-100 uppercase">{title}</h3>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => onAdd({ type: 'text', content: '' })}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 rounded text-xs font-semibold transition-all"
+                    >
+                        <Type className="w-3.5 h-3.5" /> Text
+                    </button>
+                    <button
+                        onClick={() => onAdd({ type: 'image', url: '', caption: '' })}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded text-xs font-semibold transition-all"
+                    >
+                        <ImageIcon className="w-3.5 h-3.5" /> Image
+                    </button>
+                    {supportVideo && (
+                        <button
+                            onClick={() => onAdd({ type: 'video', url: '', caption: '' })}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 text-green-300 rounded text-xs font-semibold transition-all"
+                        >
+                            <Video className="w-3.5 h-3.5" /> Video
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {(!blocks || blocks.length === 0) && (
+                <div className="py-8 text-center text-amber-100/30 text-sm border border-dashed border-amber-900/20 rounded-lg">
+                    No content blocks yet. Add text, images{supportVideo ? ', or videos' : ''} above.
+                </div>
+            )}
+
+            {blocks.map((block, idx) => (
+                <div key={idx} className="mb-3 p-4 bg-stone-800/40 border border-amber-900/20 rounded-xl">
+                    <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-bold tracking-wider text-amber-100/70 uppercase flex items-center gap-2">
+                            {block.type === 'text' && <Type className="w-4 h-4 text-blue-400" />}
+                            {block.type === 'image' && <ImageIcon className="w-4 h-4 text-purple-400" />}
+                            {block.type === 'video' && <Video className="w-4 h-4 text-green-400" />}
+                            {block.type.charAt(0).toUpperCase() + block.type.slice(1)} Block #{idx + 1}
+                        </span>
+                        <div className="flex gap-2">
+                            {idx > 0 && (
+                                <button onClick={() => onMove(idx, 'up')} className="p-1 text-amber-100/50 hover:text-amber-100 transition-colors" title="Move Up">↑</button>
+                            )}
+                            {idx < blocks.length - 1 && (
+                                <button onClick={() => onMove(idx, 'down')} className="p-1 text-amber-100/50 hover:text-amber-100 transition-colors" title="Move Down">↓</button>
+                            )}
+                            <button onClick={() => onRemove(idx)} className="p-1 text-red-400/50 hover:text-red-400 transition-colors">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {block.type === 'text' ? (
+                        <textarea
+                            value={block.content || ''}
+                            onChange={(e) => onChange(idx, 'content', e.target.value)}
+                            rows={3}
+                            placeholder="Enter text content..."
+                            className="w-full bg-stone-950/60 border border-amber-900/30 rounded-lg px-3 py-2 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-blue-500/50 transition-all text-sm leading-relaxed"
+                        />
+                    ) : (
+                        <div className="space-y-2">
+                            <div>
+                                <label className="block text-[10px] font-bold tracking-widest text-amber-100/50 uppercase mb-1.5">
+                                    {block.type === 'video' ? 'Video URL or Upload' : 'Image URL or Upload'}
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={block.url || ''}
+                                        onChange={(e) => onChange(idx, 'url', e.target.value)}
+                                        placeholder="https://..."
+                                        className="flex-1 bg-stone-950/60 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-purple-500/50"
+                                    />
+                                    <label className={`px-4 py-2 ${block.type === 'video' ? 'bg-green-600/20 border-green-500/30 text-green-300' : 'bg-purple-600/20 border-purple-500/30 text-purple-300'} border rounded text-xs font-semibold cursor-pointer hover:opacity-80 transition-all flex items-center gap-1.5`}>
+                                        <Upload className="w-3.5 h-3.5" /> Upload
+                                        <input type="file" accept={block.type === 'video' ? 'video/*' : 'image/*'} onChange={(e) => {
+                                            const file = e.target.files[0]
+                                            if (!file) return
+                                            const formData = new FormData()
+                                            formData.append('media', file)
+                                            fetch(`${import.meta.env.VITE_API_URL || '/api'}/upload`, {
+                                                method: 'POST',
+                                                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` },
+                                                body: formData
+                                            })
+                                                .then(res => res.json())
+                                                .then(data => {
+                                                    if (data.success) {
+                                                        onChange(idx, 'url', data.url)
+                                                        setNotification('Upload successful!')
+                                                        setTimeout(() => setNotification(''), 3000)
+                                                    }
+                                                })
+                                        }} className="hidden" />
+                                    </label>
+                                </div>
+                            </div>
+                            {block.url && (
+                                block.type === 'video' ? (
+                                    <video src={block.url} className="w-full h-48 object-cover rounded-lg border border-amber-900/20" controls />
+                                ) : (
+                                    <img src={block.url} alt="Preview" className="w-full h-48 object-cover rounded-lg border border-amber-900/20" />
+                                )
+                            )}
+                            <div>
+                                <label className="block text-[10px] font-bold tracking-widest text-amber-100/50 uppercase mb-1.5">Caption (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={block.caption || ''}
+                                    onChange={(e) => onChange(idx, 'caption', e.target.value)}
+                                    placeholder="Caption or description..."
+                                    className="w-full bg-stone-950/60 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-purple-500/50"
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+    )
 
     const tabs = [
         { id: 'hero', label: 'Hero Section', icon: Type },
@@ -251,22 +416,80 @@ export default function Admin() {
                     {/* HERO TAB */}
                     {activeTab === 'hero' && (
                         <div className="space-y-6">
-                            <div>
-                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-2">Hero Title</label>
-                                <input
-                                    type="text" name="heroText" value={content.heroText || ''} onChange={handleChange}
-                                    placeholder="Enter hero title..."
-                                    className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 focus:ring-1 focus:ring-yellow-600/50 transition-all font-serif text-lg"
-                                />
+                            <div className="p-5 bg-gradient-to-br from-yellow-900/10 to-amber-900/10 border border-yellow-600/20 rounded-xl">
+                                <h3 className="text-xs font-bold tracking-widest text-yellow-500 uppercase mb-4 flex items-center gap-2">
+                                    <Type className="w-4 h-4" /> Main Hero Content
+                                </h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-[10px] font-semibold tracking-widest text-amber-100 uppercase mb-2">Hero Title</label>
+                                        <input
+                                            type="text" name="heroText" value={content.heroText || ''} onChange={handleChange}
+                                            placeholder="Enter hero title..."
+                                            className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 focus:ring-1 focus:ring-yellow-600/50 transition-all font-serif text-lg"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-semibold tracking-widest text-amber-100 uppercase mb-2">Hero Subtitle/Description</label>
+                                        <textarea
+                                            name="heroDescription" value={content.heroDescription || ''} onChange={handleChange} rows={3}
+                                            placeholder="Enter hero description..."
+                                            className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 focus:ring-1 focus:ring-yellow-600/50 transition-all text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-semibold tracking-widest text-amber-100 uppercase mb-2">Background Image URL</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text" name="heroBackgroundImage" value={content.heroBackgroundImage || ''} onChange={handleChange}
+                                                placeholder="https://..."
+                                                className="flex-1 bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-2.5 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 text-sm"
+                                            />
+                                            <label className="px-4 py-2 bg-yellow-600/20 border border-yellow-500/30 text-yellow-300 rounded-lg text-xs font-semibold cursor-pointer hover:bg-yellow-600/30 transition-all flex items-center gap-1.5">
+                                                <Upload className="w-3.5 h-3.5" /> Upload
+                                                <input type="file" accept="image/*" onChange={async (e) => {
+                                                    const file = e.target.files[0]
+                                                    if (!file) return
+                                                    const formData = new FormData()
+                                                    formData.append('media', file)
+                                                    const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/upload`, {
+                                                        method: 'POST',
+                                                        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` },
+                                                        body: formData
+                                                    })
+                                                    const data = await res.json()
+                                                    if (data.success) {
+                                                        setContent({ ...content, heroBackgroundImage: data.url })
+                                                        setNotification('Background uploaded!')
+                                                        setTimeout(() => setNotification(''), 3000)
+                                                    }
+                                                }} className="hidden" />
+                                            </label>
+                                        </div>
+                                        {content.heroBackgroundImage && (
+                                            <img src={content.heroBackgroundImage} alt="Hero background preview" className="mt-3 w-full h-32 object-cover rounded-lg border border-amber-900/20" />
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-2">Hero subtitle/description</label>
-                                <textarea
-                                    name="heroDescription" value={content.heroDescription || ''} onChange={handleChange} rows={3}
-                                    placeholder="Enter hero description..."
-                                    className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 focus:ring-1 focus:ring-yellow-600/50 transition-all text-sm"
-                                />
-                            </div>
+
+                            {/* Rich Content Blocks for Hero */}
+                            <ContentBlockEditor
+                                blocks={content.heroContent || []}
+                                onChange={(idx, field, value) => handleArrayChange('heroContent', idx, field, value)}
+                                onAdd={(block) => addArrayItem('heroContent', block)}
+                                onRemove={(idx) => removeArrayItem('heroContent', idx)}
+                                onMove={(idx, dir) => {
+                                    const newArray = [...content.heroContent]
+                                    const newIdx = dir === 'up' ? idx - 1 : idx + 1
+                                    if (newIdx < 0 || newIdx >= newArray.length) return
+                                    ;[newArray[idx], newArray[newIdx]] = [newArray[newIdx], newArray[idx]]
+                                    setContent({ ...content, heroContent: newArray })
+                                }}
+                                title="Additional Hero Content"
+                                supportVideo={true}
+                            />
+
                             <div className="pt-6 border-t border-amber-900/20">
                                 <h3 className="text-sm font-semibold tracking-widest text-amber-100 uppercase mb-4">Page Titles</h3>
                                 <div className="grid md:grid-cols-2 gap-4">
@@ -287,6 +510,10 @@ export default function Admin() {
                                         <input type="text" name="pageTitle_gallery" value={content.pageTitle_gallery || 'Gallery'} onChange={handleChange} placeholder="Gallery" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
                                     </div>
                                     <div>
+                                        <label className="block text-[10px] font-bold tracking-widest text-amber-100/70 uppercase mb-1">Tertulia Page Title</label>
+                                        <input type="text" name="pageTitle_tertulia" value={content.pageTitle_tertulia || 'Tertulia Sessions'} onChange={handleChange} placeholder="Tertulia Sessions" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                    </div>
+                                    <div>
                                         <label className="block text-[10px] font-bold tracking-widest text-amber-100/70 uppercase mb-1">Contact Page Title</label>
                                         <input type="text" name="pageTitle_contact" value={content.pageTitle_contact || 'Contact Us'} onChange={handleChange} placeholder="Contact Us" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
                                     </div>
@@ -298,21 +525,137 @@ export default function Admin() {
                     {/* ABOUT TAB */}
                     {activeTab === 'about' && (
                         <div className="space-y-6">
-                            <div>
-                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-2">About Paragraph 1</label>
-                                <textarea
-                                    name="aboutDescription1" value={content.aboutDescription1 || ''} onChange={handleChange} rows={4}
-                                    placeholder="Enter first about paragraph..."
-                                    className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 transition-all text-sm leading-relaxed"
+                            {/* Subtitle Editor */}
+                            <div className="p-5 bg-amber-900/10 border border-amber-600/20 rounded-xl">
+                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-2">Section Subtitle</label>
+                                <input
+                                    type="text" name="aboutSubtitle" value={content.aboutSubtitle || 'Who We Are'} onChange={handleChange}
+                                    placeholder="Who We Are"
+                                    className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-2.5 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 transition-all text-sm"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-2">About Paragraph 2</label>
-                                <textarea
-                                    name="aboutDescription2" value={content.aboutDescription2 || ''} onChange={handleChange} rows={3}
-                                    placeholder="Enter second about paragraph..."
-                                    className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 transition-all text-sm leading-relaxed"
-                                />
+
+                            {/* Content Blocks Editor */}
+                            <div className="border-t border-amber-900/20 pt-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-sm font-semibold tracking-widest text-amber-100 uppercase">Content Blocks</h3>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => addArrayItem('aboutContent', { type: 'text', content: '' })}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 rounded text-xs font-semibold transition-all"
+                                        >
+                                            <Type className="w-3.5 h-3.5" /> Add Text
+                                        </button>
+                                        <button
+                                            onClick={() => addArrayItem('aboutContent', { type: 'image', url: '', caption: '' })}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded text-xs font-semibold transition-all"
+                                        >
+                                            <ImageIcon className="w-3.5 h-3.5" /> Add Image
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {(!content.aboutContent || content.aboutContent.length === 0) && (
+                                    <div className="py-12 text-center text-amber-100/30 text-sm border border-dashed border-amber-900/20 rounded-lg">
+                                        No content blocks yet. Add text paragraphs or images above.
+                                    </div>
+                                )}
+
+                                {(content.aboutContent || []).map((block, idx) => (
+                                    <div key={idx} className="mb-4 p-5 bg-stone-800/40 border border-amber-900/20 rounded-xl">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className="text-xs font-bold tracking-wider text-amber-100/70 uppercase flex items-center gap-2">
+                                                {block.type === 'text' ? <Type className="w-4 h-4 text-blue-400" /> : <ImageIcon className="w-4 h-4 text-purple-400" />}
+                                                {block.type === 'text' ? 'Text Block' : 'Image Block'} #{idx + 1}
+                                            </span>
+                                            <div className="flex gap-2">
+                                                {idx > 0 && (
+                                                    <button onClick={() => {
+                                                        const newArray = [...content.aboutContent]
+                                                        ;[newArray[idx], newArray[idx-1]] = [newArray[idx-1], newArray[idx]]
+                                                        setContent({ ...content, aboutContent: newArray })
+                                                    }} className="p-1 text-amber-100/50 hover:text-amber-100 transition-colors" title="Move Up">↑</button>
+                                                )}
+                                                {idx < content.aboutContent.length - 1 && (
+                                                    <button onClick={() => {
+                                                        const newArray = [...content.aboutContent]
+                                                        ;[newArray[idx], newArray[idx+1]] = [newArray[idx+1], newArray[idx]]
+                                                        setContent({ ...content, aboutContent: newArray })
+                                                    }} className="p-1 text-amber-100/50 hover:text-amber-100 transition-colors" title="Move Down">↓</button>
+                                                )}
+                                                <button
+                                                    onClick={() => removeArrayItem('aboutContent', idx)}
+                                                    className="p-1 text-red-400/50 hover:text-red-400 transition-colors"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {block.type === 'text' ? (
+                                            <textarea
+                                                value={block.content || ''}
+                                                onChange={(e) => handleArrayChange('aboutContent', idx, 'content', e.target.value)}
+                                                rows={4}
+                                                placeholder="Enter paragraph text..."
+                                                className="w-full bg-stone-950/60 border border-amber-900/30 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-blue-500/50 transition-all text-sm leading-relaxed"
+                                            />
+                                        ) : (
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="block text-[10px] font-bold tracking-widest text-amber-100/50 uppercase mb-1.5">Image URL or Upload</label>
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={block.url || ''}
+                                                            onChange={(e) => handleArrayChange('aboutContent', idx, 'url', e.target.value)}
+                                                            placeholder="https://... or upload below"
+                                                            className="flex-1 bg-stone-950/60 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-purple-500/50"
+                                                        />
+                                                        <label className="px-4 py-2 bg-purple-600/20 border border-purple-500/30 text-purple-300 rounded text-xs font-semibold cursor-pointer hover:bg-purple-600/30 transition-all flex items-center gap-1.5">
+                                                            <Upload className="w-3.5 h-3.5" /> Upload
+                                                            <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'aboutContent', idx, 'url')} className="hidden" />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                {block.url && (
+                                                    <img src={block.url} alt="Preview" className="w-full h-48 object-cover rounded-lg border border-amber-900/20" />
+                                                )}
+                                                <div>
+                                                    <label className="block text-[10px] font-bold tracking-widest text-amber-100/50 uppercase mb-1.5">Caption (Optional)</label>
+                                                    <input
+                                                        type="text"
+                                                        value={block.caption || ''}
+                                                        onChange={(e) => handleArrayChange('aboutContent', idx, 'caption', e.target.value)}
+                                                        placeholder="Image caption or description..."
+                                                        className="w-full bg-stone-950/60 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-purple-500/50"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Legacy fields for backward compatibility */}
+                            <div className="border-t border-amber-900/20 pt-6 opacity-50">
+                                <p className="text-xs text-amber-100/40 mb-3 italic">Legacy fields (kept for compatibility):</p>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="block text-[10px] font-semibold tracking-widest text-amber-100/50 uppercase mb-1">About Paragraph 1</label>
+                                        <textarea
+                                            name="aboutDescription1" value={content.aboutDescription1 || ''} onChange={handleChange} rows={2}
+                                            className="w-full bg-stone-950/50 border border-amber-900/20 rounded px-3 py-2 text-amber-50/50 text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-semibold tracking-widest text-amber-100/50 uppercase mb-1">About Paragraph 2</label>
+                                        <textarea
+                                            name="aboutDescription2" value={content.aboutDescription2 || ''} onChange={handleChange} rows={2}
+                                            className="w-full bg-stone-950/50 border border-amber-900/20 rounded px-3 py-2 text-amber-50/50 text-xs"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -357,25 +700,49 @@ export default function Admin() {
                     {/* TERTULIA TAB */}
                     {activeTab === 'tertulia' && (
                         <div className="space-y-8">
-                            <div>
-                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-2">Page Title</label>
-                                <input
-                                    type="text" name="pageTitle_tertulia" value={content.pageTitle_tertulia || 'Tertulia Sessions'} onChange={handleChange}
-                                    placeholder="Tertulia Sessions"
-                                    className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 focus:ring-1 focus:ring-yellow-600/50 transition-all font-serif text-lg"
-                                />
+                            <div className="p-5 bg-gradient-to-br from-amber-900/10 to-orange-900/10 border border-amber-600/20 rounded-xl">
+                                <h3 className="text-xs font-bold tracking-widest text-amber-500 uppercase mb-4 flex items-center gap-2">
+                                    <Coffee className="w-4 h-4" /> Tertulia Main Info
+                                </h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-[10px] font-semibold tracking-widest text-amber-100 uppercase mb-2">Page Title</label>
+                                        <input
+                                            type="text" name="pageTitle_tertulia" value={content.pageTitle_tertulia || 'Tertulia Sessions'} onChange={handleChange}
+                                            placeholder="Tertulia Sessions"
+                                            className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 focus:ring-1 focus:ring-yellow-600/50 transition-all font-serif text-lg"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-semibold tracking-widest text-amber-100 uppercase mb-2">Description</label>
+                                        <textarea
+                                            name="tertuliaDescription" value={content.tertuliaDescription || ''} onChange={handleChange} rows={4}
+                                            placeholder="Enter tertulia description..."
+                                            className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 transition-all text-sm leading-relaxed"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-2">Description</label>
-                                <textarea
-                                    name="tertuliaDescription" value={content.tertuliaDescription || ''} onChange={handleChange} rows={4}
-                                    placeholder="Enter tertulia description..."
-                                    className="w-full bg-stone-950/80 border border-amber-900/40 rounded-lg px-4 py-3 text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50 transition-all text-sm leading-relaxed"
-                                />
-                            </div>
+
+                            {/* Rich Content Blocks */}
+                            <ContentBlockEditor
+                                blocks={content.tertuliaContent || []}
+                                onChange={(idx, field, value) => handleArrayChange('tertuliaContent', idx, field, value)}
+                                onAdd={(block) => addArrayItem('tertuliaContent', block)}
+                                onRemove={(idx) => removeArrayItem('tertuliaContent', idx)}
+                                onMove={(idx, dir) => {
+                                    const newArray = [...(content.tertuliaContent || [])]
+                                    const newIdx = dir === 'up' ? idx - 1 : idx + 1
+                                    if (newIdx < 0 || newIdx >= newArray.length) return
+                                    ;[newArray[idx], newArray[newIdx]] = [newArray[newIdx], newArray[idx]]
+                                    setContent({ ...content, tertuliaContent: newArray })
+                                }}
+                                title="Article Content (News Portal Style)"
+                                supportVideo={true}
+                            />
                             
-                            <div>
-                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-4">Tertulia Media Gallery (Images & Videos)</label>
+                            <div className="pt-6 border-t border-amber-900/20">
+                                <label className="block text-xs font-semibold tracking-widest text-amber-100 uppercase mb-4">Media Gallery (Images & Videos)</label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {(content.tertuliaMedia || []).map((item, idx) => (
                                         <div key={idx} className="bg-stone-800/30 border border-amber-900/30 rounded-xl overflow-hidden relative group shadow-lg">
@@ -423,49 +790,92 @@ export default function Admin() {
 
                     {/* PRODUCTIONS TAB */}
                     {activeTab === 'productions' && (
-                        <div className="space-y-8">
-                            {(content.productions || []).map((item, idx) => (
-                                <div key={idx} className="p-5 bg-stone-800/30 border border-amber-900/30 rounded-xl relative group">
-                                    <button onClick={() => removeArrayItem('productions', idx)} className="absolute -top-3 -right-3 w-8 h-8 flex items-center justify-center bg-red-500/10 text-red-500 rounded-full border border-red-500/20 hover:bg-red-500 hover:text-white transition-colors">
-                                        <X className="w-5 h-5" />
-                                    </button>
-                                    <div className="grid md:grid-cols-3 gap-4 mb-4">
-                                        <div className="md:col-span-2">
-                                            <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Title</label>
-                                            <input type="text" value={item.title || ''} onChange={(e) => handleArrayChange('productions', idx, 'title', e.target.value)} placeholder="Production Title" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                        <div className="space-y-6">
+                            {(content.productions || []).map((prod, idx) => {
+                                const isExpanded = expandedProductions[idx]
+                                return (
+                                    <div key={idx} className="p-5 bg-stone-800/30 border-2 border-amber-900/30 rounded-xl relative">
+                                        <button onClick={() => removeArrayItem('productions', idx)} className="absolute-top-3 -right-3 w-8 h-8 flex items-center justify-center bg-red-500/10 text-red-500 rounded-full border border-red-500/20 hover:bg-red-500 hover:text-white transition-colors z-10">
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                        
+                                        {/* Production Header */}
+                                        <div className="flex items-start justify-between mb-4">
+                                            <h3 className="text-lg font-serif font-bold text-yellow-500 flex items-center gap-2">
+                                                <Film className="w-5 h-5" />
+                                                {prod.title || `Production #${idx + 1}`}
+                                            </h3>
+                                            <button
+                                                onClick={() => setExpandedProductions({ ...expandedProductions, [idx]: !isExpanded })}
+                                                className="flex items-center gap-2 px-3 py-1.5 text-xs bg-amber-900/20 hover:bg-amber-900/30 text-amber-300 rounded border border-amber-700/30 transition-all"
+                                            >
+                                                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                                {isExpanded ? 'Collapse' : 'Expand Article Editor'}
+                                            </button>
+                                        </div>
+
+                                        {/* Basic Info */}
+                                        <div className="grid md:grid-cols-3 gap-4 mb-4">
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Production Title</label>
+                                                <input type="text" value={prod.title || ''} onChange={(e) => handleArrayChange('productions', idx, 'title', e.target.value)} placeholder="e.g., Romeo & Juliet" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Year</label>
+                                                <input type="text" value={prod.year || ''} onChange={(e) => handleArrayChange('productions', idx, 'year', e.target.value)} placeholder="2024" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                            </div>
+                                        </div>
+                                        <div className="grid md:grid-cols-3 gap-4 mb-4">
+                                            <div>
+                                                <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Genre</label>
+                                                <input type="text" value={prod.genre || ''} onChange={(e) => handleArrayChange('productions', idx, 'genre', e.target.value)} placeholder="Drama, Comedy..." className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Short Description (Tagline)</label>
+                                                <input type="text" value={prod.description || ''} onChange={(e) => handleArrayChange('productions', idx, 'description', e.target.value)} placeholder="Brief one-liner..." className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                            </div>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Year</label>
-                                            <input type="text" value={item.year || ''} onChange={(e) => handleArrayChange('productions', idx, 'year', e.target.value)} placeholder="2024" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                            <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Cover Image/Video</label>
+                                            <div className="flex gap-2 mb-2">
+                                                <input type="text" value={prod.image || ''} onChange={(e) => handleArrayChange('productions', idx, 'image', e.target.value)} placeholder="https://..." className="flex-1 bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                                <label className="cursor-pointer flex items-center gap-2 bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-500/30 text-yellow-300 px-4 py-2 rounded text-xs font-bold transition-all">
+                                                    <Upload className="w-4 h-4" /> Upload
+                                                    <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, 'productions', idx, 'image')} />
+                                                </label>
+                                            </div>
+                                            {prod.image && (
+                                                <img src={prod.image} alt="Cover preview" className="w-full h-40 object-cover rounded border border-amber-900/20" />
+                                            )}
                                         </div>
+
+                                        {/* Rich Content Editor (Expandable) */}
+                                        {isExpanded && (
+                                            <div className="mt-6 pt-6 border-t-2 border-amber-900/20">
+                                                <h4 className="text-sm font-bold tracking-widest text-green-400 uppercase mb-3 flex items-center gap-2">
+                                                    <Type className="w-4 h-4" /> Full Article Content (News Portal Style)
+                                                </h4>
+                                                <p className="text-xs text-amber-100/50 mb-4 italic">Add detailed story, behind-the-scenes, cast info, multiple images/videos...</p>
+                                                
+                                                <ContentBlockEditor
+                                                    blocks={prod.content || []}
+                                                    onChange={(blockIdx, field, value) => handleNestedContentChange('productions', idx, 'content', blockIdx, field, value)}
+                                                    onAdd={(block) => addNestedContent('productions', idx, 'content', block)}
+                                                    onRemove={(blockIdx) => removeNestedContent('productions', idx, 'content', blockIdx)}
+                                                    onMove={(blockIdx, dir) => moveNestedContent('productions', idx, 'content', blockIdx, dir)}
+                                                    title={`Content Blocks for "${prod.title || 'Production'}"`}
+                                                    supportVideo={true}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="grid md:grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Genre</label>
-                                            <input type="text" value={item.genre || ''} onChange={(e) => handleArrayChange('productions', idx, 'genre', e.target.value)} placeholder="Drama" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Description</label>
-                                            <input type="text" value={item.description || ''} onChange={(e) => handleArrayChange('productions', idx, 'description', e.target.value)} placeholder="Brief description" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
-                                        </div>
-                                    </div>
-                                    <div className="mt-4">
-                                        <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Cover Media (Image/Video URL)</label>
-                                        <div className="flex gap-2">
-                                            <input type="text" value={item.image || ''} onChange={(e) => handleArrayChange('productions', idx, 'image', e.target.value)} placeholder="http://..." className="flex-1 bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
-                                            <label className="cursor-pointer flex items-center gap-2 bg-stone-800 hover:bg-stone-700 border border-amber-900/30 text-amber-100 px-4 py-2 rounded text-xs font-bold uppercase transition-colors">
-                                                <Upload className="w-4 h-4" /> Upload
-                                                <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, 'productions', idx, 'image')} />
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                             <button
-                                onClick={() => addArrayItem('productions', { title: 'New Production', year: new Date().getFullYear().toString(), genre: 'Drama', description: '', image: '' })}
+                                onClick={() => addArrayItem('productions', { title: 'New Production', year: new Date().getFullYear().toString(), genre: 'Drama', description: '', image: '', content: [] })}
                                 className="w-full py-4 border-2 border-dashed border-amber-900/30 rounded-xl text-yellow-600 hover:bg-yellow-600/5 hover:border-yellow-600/50 transition-colors text-sm font-bold tracking-widest uppercase flex items-center justify-center gap-2"
                             >
-                                <Plus className="w-5 h-5" /> Add Production
+                                <Plus className="w-5 h-5" /> Add New Production
                             </button>
                         </div>
                     )}
@@ -520,33 +930,90 @@ export default function Admin() {
                     {/* TEAM TAB */}
                     {activeTab === 'team' && (
                         <div className="space-y-6">
-                            {(content.team || []).map((item, idx) => (
-                                <div key={idx} className="p-5 bg-stone-800/30 border border-amber-900/30 rounded-xl relative group">
-                                    <button onClick={() => removeArrayItem('team', idx)} className="absolute -top-3 -right-3 w-8 h-8 flex items-center justify-center bg-red-500/10 text-red-500 rounded-full border border-red-500/20 hover:bg-red-500 hover:text-white transition-colors">
-                                        <X className="w-5 h-5" />
-                                    </button>
-                                    <div className="grid md:grid-cols-3 gap-4 mb-4">
-                                        <div>
-                                            <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Name</label>
-                                            <input type="text" value={item.name || ''} onChange={(e) => handleArrayChange('team', idx, 'name', e.target.value)} placeholder="Full Name" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                            {(content.team || []).map((member, idx) => {
+                                const isExpanded = expandedTeam[idx]
+                                return (
+                                    <div key={idx} className="p-5 bg-stone-800/30 border-2 border-amber-900/30 rounded-xl relative">
+                                        <button onClick={() => removeArrayItem('team', idx)} className="absolute -top-3 -right-3 w-8 h-8 flex items-center justify-center bg-red-500/10 text-red-500 rounded-full border border-red-500/20 hover:bg-red-500 hover:text-white transition-colors z-10">
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                        
+                                        {/* Member Header */}
+                                        <div className="flex items-start justify-between mb-4">
+                                            <h3 className="text-lg font-serif font-bold text-amber-300 flex items-center gap-2">
+                                                <Users className="w-5 h-5" />
+                                                {member.name || `Team Member #${idx + 1}`}
+                                            </h3>
+                                            <button
+                                                onClick={() => setExpandedTeam({ ...expandedTeam, [idx]: !isExpanded })}
+                                                className="flex items-center gap-2 px-3 py-1.5 text-xs bg-amber-900/20 hover:bg-amber-900/30 text-amber-300 rounded border border-amber-700/30 transition-all"
+                                            >
+                                                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                                {isExpanded ? 'Collapse' : 'Expand Bio Editor'}
+                                            </button>
                                         </div>
-                                        <div>
-                                            <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Role / Position</label>
-                                            <input type="text" value={item.role || ''} onChange={(e) => handleArrayChange('team', idx, 'role', e.target.value)} placeholder="President" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+
+                                        {/* Basic Info */}
+                                        <div className="grid md:grid-cols-3 gap-4 mb-4">
+                                            <div>
+                                                <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Full Name</label>
+                                                <input type="text" value={member.name || ''} onChange={(e) => handleArrayChange('team', idx, 'name', e.target.value)} placeholder="e.g., John Doe" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Role / Position</label>
+                                                <input type="text" value={member.role || ''} onChange={(e) => handleArrayChange('team', idx, 'role', e.target.value)} placeholder="President, Director..." className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Alias/Nickname (aka)</label>
+                                                <input type="text" value={member.aka || ''} onChange={(e) => handleArrayChange('team', idx, 'aka', e.target.value)} placeholder="Nickname" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Alias (Aka)</label>
-                                            <input type="text" value={item.aka || ''} onChange={(e) => handleArrayChange('team', idx, 'aka', e.target.value)} placeholder="Nickname" className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+
+                                        {/* Profile Photo */}
+                                        <div className="mb-4">
+                                            <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Profile Photo</label>
+                                            <div className="flex gap-2 mb-2">
+                                                <input type="text" value={member.photo || ''} onChange={(e) => handleArrayChange('team', idx, 'photo', e.target.value)} placeholder="https://..." className="flex-1 bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                                <label className="cursor-pointer flex items-center gap-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 px-4 py-2 rounded text-xs font-bold transition-all">
+                                                    <Upload className="w-4 h-4" /> Upload
+                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'team', idx, 'photo')} />
+                                                </label>
+                                            </div>
+                                            {member.photo && (
+                                                <img src={member.photo} alt="Profile preview" className="w-32 h-32 object-cover rounded-full border-2 border-amber-900/30" />
+                                            )}
                                         </div>
+
+                                        {/* Short Bio */}
+                                        <div className="mb-4">
+                                            <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Short Bio (Legacy)</label>
+                                            <textarea value={member.description || ''} onChange={(e) => handleArrayChange('team', idx, 'description', e.target.value)} rows={2} placeholder="Brief one-paragraph bio..." className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
+                                        </div>
+
+                                        {/* Rich Bio Content (Expandable) */}
+                                        {isExpanded && (
+                                            <div className="mt-6 pt-6 border-t-2 border-amber-900/20">
+                                                <h4 className="text-sm font-bold tracking-widest text-blue-400 uppercase mb-3 flex items-center gap-2">
+                                                    <Type className="w-4 h-4" /> Extended Bio Content (News Style)
+                                                </h4>
+                                                <p className="text-xs text-amber-100/50 mb-4 italic">Create a detailed profile with achievements, background stories, quotes, images...</p>
+                                                
+                                                <ContentBlockEditor
+                                                    blocks={member.bio || []}
+                                                    onChange={(blockIdx, field, value) => handleNestedContentChange('team', idx, 'bio', blockIdx, field, value)}
+                                                    onAdd={(block) => addNestedContent('team', idx, 'bio', block)}
+                                                    onRemove={(blockIdx) => removeNestedContent('team', idx, 'bio', blockIdx)}
+                                                    onMove={(blockIdx, dir) => moveNestedContent('team', idx, 'bio', blockIdx, dir)}
+                                                    title={`Bio Content for "${member.name || 'Member'}"`}
+                                                    supportVideo={false}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] font-bold tracking-widest text-amber-100 uppercase mb-1">Bio Description</label>
-                                        <textarea value={item.description || ''} onChange={(e) => handleArrayChange('team', idx, 'description', e.target.value)} rows={2} placeholder="Brief bio..." className="w-full bg-stone-950/50 border border-amber-900/30 rounded px-3 py-2 text-sm text-amber-50 placeholder:text-amber-100/30 focus:outline-none focus:border-yellow-600/50" />
-                                    </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                             <button
-                                onClick={() => addArrayItem('team', { name: 'New Executive', aka: '', role: 'Member', description: '' })}
+                                onClick={() => addArrayItem('team', { name: 'New Member', aka: '', role: 'Member', description: '', photo: '', bio: [] })}
                                 className="w-full py-4 border-2 border-dashed border-amber-900/30 rounded-xl text-yellow-600 hover:bg-yellow-600/5 hover:border-yellow-600/50 transition-colors text-sm font-bold tracking-widest uppercase flex items-center justify-center gap-2"
                             >
                                 <Plus className="w-5 h-5" /> Add Team Member

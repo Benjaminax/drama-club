@@ -120,6 +120,20 @@ const Settings = mongoose.model('Settings', settingsSchema);
 const contentSchema = new mongoose.Schema({
   heroText: { type: String, default: "Arts, Media & Drama Club" },
   heroDescription: { type: String, default: "A vibrant community of storytellers, performers, and creative minds dedicated to exploring the boundless world of performing and media arts." },
+  heroBackgroundImage: { type: String, default: "" },
+  heroContent: [{
+    type: { type: String, enum: ['text', 'image', 'video'], default: 'text' },
+    content: String,
+    url: String,
+    caption: String
+  }],
+  aboutSubtitle: { type: String, default: "Who We Are" },
+  aboutContent: [{
+    type: { type: String, enum: ['text', 'image'], default: 'text' },
+    content: String, // For text blocks
+    url: String, // For image blocks
+    caption: String // Optional caption for images
+  }],
   aboutDescription1: { type: String, default: "The Arts, Media & Drama Club at Academic City University is a vibrant community of passionate performers, creative minds, and storytelling enthusiasts. We provide a platform for students to explore theatrical arts, develop performance skills, and bring compelling stories to life on stage." },
   aboutDescription2: { type: String, default: "Through theatre, media, and visual arts, we foster artistic excellence, creative expression, and collaborative spirit." },
   productions: [{
@@ -127,12 +141,36 @@ const contentSchema = new mongoose.Schema({
     year: String,
     genre: String,
     description: String,
-    image: String // Added image field
+    image: String, // Main cover image
+    content: [{ // Rich content blocks for each production
+      type: { type: String, enum: ['text', 'image', 'video'], default: 'text' },
+      content: String,
+      url: String,
+      caption: String
+    }]
   }],
   gallery: [{ label: String, url: String }],
-  team: [{ name: String, aka: String, role: String, description: String }],
+  team: [{ 
+    name: String, 
+    aka: String, 
+    role: String, 
+    description: String,
+    photo: String, // Profile photo
+    bio: [{ // Rich bio content blocks
+      type: { type: String, enum: ['text', 'image'], default: 'text' },
+      content: String,
+      url: String,
+      caption: String
+    }]
+  }],
   stats: [{ icon: String, count: Number, suffix: String, label: String }],
   tertuliaDescription: String,
+  tertuliaContent: [{ // Rich content blocks for tertulia
+    type: { type: String, enum: ['text', 'image', 'video'], default: 'text' },
+    content: String,
+    url: String,
+    caption: String
+  }],
   tertuliaMedia: [{ label: String, url: String }],
   // Page Titles
   pageTitle_about: { type: String, default: "About Us" },

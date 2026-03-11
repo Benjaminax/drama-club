@@ -77,7 +77,9 @@ function AboutPage() {
         <div className="absolute inset-0 bg-stone-950/80" />
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">Who We Are</p>
+            <p data-reveal="up" className="text-yellow-600 text-xs tracking-[0.3em] mb-4 font-semibold uppercase">
+              {content.aboutSubtitle || 'Who We Are'}
+            </p>
             <h2 data-reveal="up" className="text-4xl md:text-5xl font-serif font-light text-amber-100 mb-6 tracking-tight">
               <span className="curtain-wrap">{content.pageTitle_about || 'About AMD Club'}</span>
             </h2>
@@ -85,12 +87,41 @@ function AboutPage() {
           </div>
 
           <div data-reveal="up" className="bg-stone-900/40 backdrop-blur-md rounded-2xl p-10 shadow-2xl border border-amber-900/20">
-            <p className="text-amber-100 text-lg leading-relaxed mb-5 font-light text-center max-w-4xl mx-auto">
-              {content.aboutDescription1}
-            </p>
-            <p className="text-amber-100 text-lg leading-relaxed mb-10 font-light text-center max-w-4xl mx-auto">
-              {content.aboutDescription2}
-            </p>
+            {/* Rich Content Blocks */}
+            {content.aboutContent && content.aboutContent.length > 0 ? (
+              <div className="space-y-8 mb-10">
+                {content.aboutContent.map((block, idx) => (
+                  <div key={idx}>
+                    {block.type === 'text' ? (
+                      <p className="text-amber-100 text-lg leading-relaxed font-light text-center max-w-4xl mx-auto">
+                        {block.content}
+                      </p>
+                    ) : block.type === 'image' && block.url ? (
+                      <div className="max-w-3xl mx-auto">
+                        <img 
+                          src={block.url} 
+                          alt={block.caption || 'About image'} 
+                          className="w-full rounded-xl shadow-2xl border border-amber-900/30"
+                        />
+                        {block.caption && (
+                          <p className="text-amber-100/60 text-sm text-center mt-3 italic">{block.caption}</p>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* Fallback to legacy fields */
+              <>
+                <p className="text-amber-100 text-lg leading-relaxed mb-5 font-light text-center max-w-4xl mx-auto">
+                  {content.aboutDescription1}
+                </p>
+                <p className="text-amber-100 text-lg leading-relaxed mb-10 font-light text-center max-w-4xl mx-auto">
+                  {content.aboutDescription2}
+                </p>
+              </>
+            )}
 
             <div className="grid md:grid-cols-3 gap-6">
               {(content.stats || []).map((stat, i) => {
