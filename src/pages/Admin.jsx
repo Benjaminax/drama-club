@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { LayoutDashboard, Save, Loader2, ArrowLeft, Image as ImageIcon, Users, Type, Film, Upload, LogOut, Coffee, BarChart3, X, Plus, Settings as SettingsIcon, Mail, Video, ChevronDown, ChevronUp, Sparkles, Check, AlertCircle } from 'lucide-react'
+import { LayoutDashboard, Save, Loader2, ArrowLeft, Image as ImageIcon, Users, Type, Film, Upload, LogOut, Coffee, BarChart3, X, Plus, Video, ChevronDown, ChevronUp, Sparkles, Check, AlertCircle } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 
 export default function Admin() {
     const navigate = useNavigate()
     const [content, setContent] = useState(null)
-    const [settings, setSettings] = useState(null)
     const [isSaving, setIsSaving] = useState(false)
     const [notification, setNotification] = useState('')
     const [activeTab, setActiveTab] = useState('hero')
@@ -20,19 +19,7 @@ export default function Admin() {
                     setContent(res.data)
                 }
             })
-        
-        // Fetch settings
-        const token = localStorage.getItem('adminToken')
-        fetch(`${import.meta.env.VITE_API_URL || '/api'}/settings`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => res.json())
-            .then(res => {
-                if (res.success && res.data) {
-                    setSettings(res.data)
-                }
-            })
-            .catch(err => console.error('Error fetching settings:', err))
+            .catch(err => console.error('Error fetching content:', err))
     }, [])
 
     const handleChange = (e) => {
@@ -136,49 +123,24 @@ export default function Admin() {
         setIsSaving(true)
         try {
             const token = localStorage.getItem('adminToken')
-            
-            // Save settings if on settings tab
-            if (activeTab === 'settings') {
-                const settingsRes = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/settings`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(settings)
-                })
+            const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/content`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(content)
+            })
 
-                if (settingsRes.status === 401) {
-                    handleLogout()
-                    return
-                }
+            if (res.status === 401) {
+                handleLogout()
+                return
+            }
 
-                const settingsData = await settingsRes.json()
-                if (settingsData.success) {
-                    setNotification('Settings saved successfully!')
-                    setTimeout(() => setNotification(''), 3000)
-                }
-            } else {
-                // Save content for other tabs
-                const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/content`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(content)
-                })
-
-                if (res.status === 401) {
-                    handleLogout()
-                    return
-                }
-
-                const data = await res.json()
-                if (data.success) {
-                    setNotification('Changes saved successfully!')
-                    setTimeout(() => setNotification(''), 3000)
-                }
+            const data = await res.json()
+            if (data.success) {
+                setNotification('Changes saved successfully!')
+                setTimeout(() => setNotification(''), 3000)
             }
         } catch (err) {
             console.error(err)
@@ -356,7 +318,6 @@ export default function Admin() {
         { id: 'productions', label: 'Productions', icon: Film },
         { id: 'gallery', label: 'Gallery', icon: ImageIcon },
         { id: 'team', label: 'Team Members', icon: Users },
-        { id: 'settings', label: 'Settings', icon: SettingsIcon },
     ]
 
     return (
@@ -1132,69 +1093,7 @@ export default function Admin() {
                             </div>
                         )}
 
-                        {/* SETTINGS TAB */}
-                        {activeTab === 'settings' && settings && (
-                            <div className="space-y-6">
-                                <div className="bg-linear-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-6">
-                                    <div className="flex items-start gap-4 mb-6">
-                                        <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0">
-                                            <Mail className="w-6 h-6 text-blue-400" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-slate-200 mb-1">Email Notifications</h3>
-                                            <p className="text-slate-400 text-sm">Configure where contact form submissions are sent</p>
-                                        </div>
-                                    </div>
 
-                                    <div className="space-y-5">
-                                        <div>
-                                            <label className="block text-xs font-medium text-slate-300 mb-2">Admin Email Recipient</label>
-                                            <input
-                                                type="email"
-                                                value={settings.emailRecipient || ''}
-                                                onChange={(e) => setSettings({ ...settings, emailRecipient: e.target.value })}
-                                                placeholder="admin@example.com"
-                                                className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
-                                            />
-                                            <p className="mt-2 text-xs text-slate-400">
-                                                This email address will receive notifications when visitors submit the contact form.
-                                            </p>
-                                        </div>
-
-                                        <div className="bg-slate-950/50 border border-slate-700/50 rounded-xl p-5">
-                                            <p className="text-xs font-medium text-slate-300 mb-3">Current Configuration</p>
-                                            <div className="space-y-2 text-sm text-slate-400">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                                                    <span>Email Service: Gmail</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                    <span>Recipient: {settings.emailRecipient || 'Not set'}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-5">
-                                            <div className="flex gap-3">
-                                                <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center shrink-0">
-                                                    <AlertCircle className="w-4 h-4 text-blue-400" />
-                                                </div>
-                                                <div className="text-sm text-blue-200/80 space-y-2">
-                                                    <p className="font-semibold text-blue-300">How Email Notifications Work:</p>
-                                                    <ul className="list-disc list-inside space-y-1 text-xs text-blue-200/60 ml-2">
-                                                        <li>Visitors fill out the contact form on your website</li>
-                                                        <li>You receive a notification email with their details</li>
-                                                        <li>Visitor receives an automatic confirmation email</li>
-                                                        <li>All submissions are saved to the database</li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
                     </div>
                 </div>
