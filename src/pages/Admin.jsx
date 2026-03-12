@@ -170,12 +170,12 @@ export default function Admin() {
     // Content Block Editor Component
     const ContentBlockEditor = ({ blocks = [], onChange, onAdd, onRemove, onMove, title = "Content Blocks", supportVideo = false }) => (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-yellow-500" />
                     {title}
                 </h3>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     <button
                         onClick={() => onAdd({ type: 'text', content: '' })}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 rounded-lg text-xs font-medium transition-all hover:scale-105"
@@ -212,18 +212,18 @@ export default function Admin() {
             )}
 
             {blocks.map((block, idx) => (
-                <div key={idx} className="group relative bg-slate-900/50 border border-slate-700/50 rounded-xl p-5 hover:border-slate-600/50 transition-all">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            {block.type === 'text' && <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center"><Type className="w-4 h-4 text-blue-400" /></div>}
-                            {block.type === 'image' && <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center"><ImageIcon className="w-4 h-4 text-purple-400" /></div>}
-                            {block.type === 'video' && <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center"><Video className="w-4 h-4 text-emerald-400" /></div>}
-                            <div>
-                                <span className="text-sm font-medium text-slate-200">{block.type.charAt(0).toUpperCase() + block.type.slice(1)} Block</span>
+                <div key={idx} className="group relative bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 sm:p-5 hover:border-slate-600/50 transition-all">
+                    <div className="flex items-center justify-between mb-4 gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                            {block.type === 'text' && <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center shrink-0"><Type className="w-4 h-4 text-blue-400" /></div>}
+                            {block.type === 'image' && <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center shrink-0"><ImageIcon className="w-4 h-4 text-purple-400" /></div>}
+                            {block.type === 'video' && <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center shrink-0"><Video className="w-4 h-4 text-emerald-400" /></div>}
+                            <div className="min-w-0">
+                                <span className="text-sm font-medium text-slate-200 block truncate">{block.type.charAt(0).toUpperCase() + block.type.slice(1)} Block</span>
                                 <p className="text-xs text-slate-500">Position #{idx + 1}</p>
                             </div>
                         </div>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 shrink-0">
                             {idx > 0 && (
                                 <button onClick={() => onMove(idx, 'up')} className="w-7 h-7 flex items-center justify-center bg-slate-800/50 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded-lg transition-all" title="Move Up">
                                     <ChevronUp className="w-4 h-4" />
@@ -246,13 +246,13 @@ export default function Admin() {
                             onChange={(e) => onChange(idx, 'content', e.target.value)}
                             rows={4}
                             placeholder="Enter your text content here..."
-                            className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-4 py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm leading-relaxed resize-none"
+                            className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm leading-relaxed resize-none"
                         />
                     ) : (
                         <div className="space-y-3">
                             <div>
                                 <label className="block text-xs font-medium text-slate-400 mb-2">{block.type === 'video' ? 'Video URL' : 'Image URL'}</label>
-                                <div className="flex gap-2">
+                                <div className="flex flex-col sm:flex-row gap-2">
                                     <input
                                         type="text"
                                         value={block.url || ''}
@@ -260,7 +260,7 @@ export default function Admin() {
                                         placeholder="https://example.com/media.jpg"
                                         className="flex-1 bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50"
                                     />
-                                    <label className={`px-4 py-2.5 ${block.type === 'video' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20' : 'bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20'} border rounded-lg text-xs font-medium cursor-pointer transition-all flex items-center gap-1.5 hover:scale-105`}>
+                                    <label className={`px-4 py-2.5 ${block.type === 'video' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20' : 'bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20'} border rounded-lg text-xs font-medium cursor-pointer transition-all flex items-center justify-center gap-1.5 hover:scale-105 sm:w-auto w-full`}>
                                         <Upload className="w-3.5 h-3.5" /> Upload
                                         <input type="file" accept={block.type === 'video' ? 'video/*' : 'image/*'} onChange={(e) => {
                                             const file = e.target.files[0]
@@ -287,9 +287,9 @@ export default function Admin() {
                             {block.url && (
                                 <div className="rounded-lg overflow-hidden border border-slate-700/50">
                                     {block.type === 'video' ? (
-                                        <video src={block.url} className="w-full h-56 object-cover bg-slate-950" controls />
+                                        <video src={block.url} className="w-full h-48 sm:h-56 object-cover bg-slate-950" controls />
                                     ) : (
-                                        <img src={block.url} alt="Preview" className="w-full h-56 object-cover bg-slate-950" />
+                                        <img src={block.url} alt="Preview" className="w-full h-48 sm:h-56 object-cover bg-slate-950" />
                                     )}
                                 </div>
                             )}
@@ -321,9 +321,9 @@ export default function Admin() {
     ]
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-950 via-stone-950 to-slate-900 flex">
-            {/* Professional Sidebar */}
-            <aside className="w-72 bg-linear-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-xl border-r border-slate-800/50 flex flex-col shrink-0 shadow-2xl">
+        <div className="min-h-screen bg-linear-to-br from-slate-950 via-stone-950 to-slate-900 flex flex-col lg:flex-row pb-20 lg:pb-0">
+            {/* Desktop Sidebar - Hidden on Mobile */}
+            <aside className="hidden lg:flex w-72 bg-linear-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-xl border-r border-slate-800/50 flex-col shrink-0 shadow-2xl">
                 <div className="p-6 border-b border-slate-800/50">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 bg-linear-to-br from-yellow-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
@@ -370,11 +370,77 @@ export default function Admin() {
                 </div>
             </aside>
 
+            {/* Mobile Header - Visible only on Mobile */}
+            <div className="lg:hidden sticky top-0 z-40 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800/50 shadow-xl">
+                <div className="px-4 py-3">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <div className="w-9 h-9 bg-linear-to-br from-yellow-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg shadow-yellow-500/20">
+                                <LayoutDashboard className="w-4 h-4 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-sm font-bold text-white tracking-tight">AMD Dashboard</h1>
+                                <p className="text-xs text-slate-400">{tabs.find(t => t.id === activeTab)?.label}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Link to="/" className="w-9 h-9 flex items-center justify-center bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 rounded-lg transition-all">
+                                <ArrowLeft className="w-4 h-4" />
+                            </Link>
+                            <button onClick={handleLogout} className="w-9 h-9 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all">
+                                <LogOut className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-4 py-2.5 rounded-lg text-sm font-bold transition-all disabled:opacity-50 shadow-lg shadow-yellow-500/25"
+                    >
+                        {isSaving ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="w-4 h-4" />
+                                Save Changes
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Bottom Navigation - Visible only on Mobile */}
+            <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/50 shadow-2xl">
+                <div className="flex items-center justify-around px-2 py-2">
+                    {tabs.map(tab => {
+                        const Icon = tab.icon
+                        const isActive = activeTab === tab.id
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+                                    isActive
+                                        ? 'bg-yellow-500/20 text-yellow-400'
+                                        : 'text-slate-500 hover:text-slate-300'
+                                }`}
+                            >
+                                <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-400' : ''}`} />
+                                <span className="text-xs font-medium truncate max-w-[60px]">{tab.label.split(' ')[0]}</span>
+                            </button>
+                        )
+                    })}
+                </div>
+            </nav>
+
             {/* Professional Main Content */}
             <main className="flex-1 overflow-y-auto">
-                <div className="max-w-6xl mx-auto p-8">
-                    {/* Professional Header */}
-                    <div className="flex items-center justify-between mb-8">
+                <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+                    {/* Desktop Header - Hidden on Mobile */}
+                    <div className="hidden lg:flex items-center justify-between mb-8">
                         <div>
                             <h2 className="text-3xl font-bold text-white mb-1">
                                 {tabs.find(t => t.id === activeTab)?.label}
@@ -399,39 +465,47 @@ export default function Admin() {
                             )}
                         </button>
                     </div>
+                    
+                    {/* Mobile Section Title */}
+                    <div className="lg:hidden mb-4">
+                        <h2 className="text-xl font-bold text-white">
+                            {tabs.find(t => t.id === activeTab)?.label}
+                        </h2>
+                        <p className="text-slate-400 text-xs mt-1">Edit your website content</p>
+                    </div>
 
                     {/* Success Notification */}
                     {notification && (
-                        <div className="mb-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm animate-in fade-in slide-in-from-top-2">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                                    <Check className="w-4 h-4 text-emerald-400" />
+                        <div className="mb-4 lg:mb-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 sm:p-4 flex items-center justify-between backdrop-blur-sm animate-in fade-in slide-in-from-top-2">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center shrink-0">
+                                    <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
                                 </div>
-                                <span className="text-emerald-300 text-sm font-medium">{notification}</span>
+                                <span className="text-emerald-300 text-xs sm:text-sm font-medium">{notification}</span>
                             </div>
-                            <button onClick={() => setNotification('')} className="text-emerald-400/50 hover:text-emerald-400 transition-colors">
+                            <button onClick={() => setNotification('')} className="text-emerald-400/50 hover:text-emerald-400 transition-colors ml-2">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
                     )}
 
                     {/* Content Editor Card */}
-                    <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-8 shadow-2xl">
+                    <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-2xl">
 
                         {/* HERO TAB */}
                         {activeTab === 'hero' && (
-                            <div className="space-y-8">
-                                <div className="bg-linear-to-br from-yellow-500/5 to-amber-500/5 border border-yellow-500/20 rounded-xl p-6">
-                                    <h3 className="text-sm font-semibold text-yellow-400 mb-5 flex items-center gap-2">
+                            <div className="space-y-6 sm:space-y-8">
+                                <div className="bg-linear-to-br from-yellow-500/5 to-amber-500/5 border border-yellow-500/20 rounded-xl p-4 sm:p-6">
+                                    <h3 className="text-sm font-semibold text-yellow-400 mb-4 sm:mb-5 flex items-center gap-2">
                                         <Sparkles className="w-4 h-4" /> Main Hero Content
                                     </h3>
-                                    <div className="space-y-5">
+                                    <div className="space-y-4 sm:space-y-5">
                                         <div>
                                             <label className="block text-xs font-medium text-slate-300 mb-2">Hero Title</label>
                                             <input
                                                 type="text" name="heroText" value={content.heroText || ''} onChange={handleChange}
                                                 placeholder="Enter hero title..."
-                                                className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all font-serif text-lg"
+                                                className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all font-serif text-base sm:text-lg"
                                             />
                                         </div>
                                         <div>
@@ -439,18 +513,18 @@ export default function Admin() {
                                             <textarea
                                                 name="heroDescription" value={content.heroDescription || ''} onChange={handleChange} rows={3}
                                                 placeholder="Enter hero description..."
-                                                className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all text-sm resize-none"
+                                                className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all text-sm resize-none"
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-slate-300 mb-2">Background Image URL</label>
-                                            <div className="flex gap-2 mb-3">
+                                            <div className="flex flex-col sm:flex-row gap-2 mb-3">
                                                 <input
                                                     type="text" name="heroBackgroundImage" value={content.heroBackgroundImage || ''} onChange={handleChange}
                                                     placeholder="https://example.com/image.jpg"
-                                                    className="flex-1 bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-2.5 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-sm"
+                                                    className="flex-1 bg-slate-950/80 border border-slate-700/50 rounded-xl px-3 sm:px-4 py-2.5 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-sm"
                                                 />
-                                                <label className="px-5 py-2.5 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 rounded-xl text-xs font-medium cursor-pointer hover:bg-yellow-500/20 transition-all flex items-center gap-2 hover:scale-105">
+                                                <label className="px-5 py-2.5 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 rounded-xl text-xs font-medium cursor-pointer hover:bg-yellow-500/20 transition-all flex items-center justify-center gap-2 hover:scale-105 sm:w-auto w-full">
                                                     <Upload className="w-4 h-4" /> Upload
                                                     <input type="file" accept="image/*" onChange={async (e) => {
                                                         const file = e.target.files[0]
@@ -473,7 +547,7 @@ export default function Admin() {
                                             </div>
                                             {content.heroBackgroundImage && (
                                                 <div className="rounded-xl overflow-hidden border border-slate-700/50">
-                                                    <img src={content.heroBackgroundImage} alt="Hero background preview" className="w-full h-40 object-cover" />
+                                                    <img src={content.heroBackgroundImage} alt="Hero background preview" className="w-full h-32 sm:h-40 object-cover" />
                                                 </div>
                                             )}
                                         </div>
@@ -497,7 +571,7 @@ export default function Admin() {
                                     supportVideo={true}
                                 />
 
-                                <div className="pt-6 border-t border-slate-800/50 space-y-6">
+                                <div className="pt-4 sm:pt-6 border-t border-slate-800/50 space-y-4 sm:space-y-6">
                                     <div>
                                         <h3 className="text-sm font-semibold text-slate-200 mb-2">Organization Name</h3>
                                         <p className="text-xs text-slate-400 mb-3">Displayed in header badge on homepage</p>
@@ -513,7 +587,7 @@ export default function Admin() {
 
                                     <div>
                                         <h3 className="text-sm font-semibold text-slate-200 mb-2">Button Labels</h3>
-                                        <div className="grid md:grid-cols-2 gap-4">
+                                        <div className="grid sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-xs font-medium text-slate-400 mb-2">Primary CTA Button</label>
                                                 <input 
@@ -541,7 +615,7 @@ export default function Admin() {
 
                                     <div>
                                         <h3 className="text-sm font-semibold text-slate-200 mb-3">Page Titles & Subtitles</h3>
-                                        <div className="grid md:grid-cols-2 gap-4">
+                                        <div className="grid sm:grid-cols-2 gap-4">
                                             {[
                                                 { name: 'pageTitle_about', label: 'About Page Title', default: 'About Us' },
                                                 { name: 'pageSubtitle_about', label: 'About Page Subtitle', default: 'Who We Are' },
@@ -588,21 +662,21 @@ export default function Admin() {
 
                         {/* ABOUT TAB */}
                         {activeTab === 'about' && (
-                            <div className="space-y-8">
-                                <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-6">
+                            <div className="space-y-6 sm:space-y-8">
+                                <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 sm:p-6">
                                     <label className="block text-xs font-medium text-slate-300 mb-2">Section Subtitle</label>
                                     <input
                                         type="text" name="aboutSubtitle" value={content.aboutSubtitle || 'Who We Are'} onChange={handleChange}
                                         placeholder="Who We Are"
-                                        className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-2.5 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all text-sm"
+                                        className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-3 sm:px-4 py-2.5 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all text-sm"
                                     />
                                 </div>
 
                                 {/* Content Blocks Editor */}
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                         <h3 className="text-sm font-semibold text-slate-200">Content Blocks</h3>
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-wrap gap-2">
                                             <button
                                                 onClick={() => addArrayItem('aboutContent', { type: 'text', content: '' })}
                                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 rounded-lg text-xs font-medium transition-all hover:scale-105"
@@ -722,10 +796,10 @@ export default function Admin() {
 
                         {/* STATS TAB */}
                         {activeTab === 'stats' && (
-                            <div className="space-y-6">
-                                <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-5">
+                            <div className="space-y-4 sm:space-y-6">
+                                <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 sm:p-5">
                                     <div className="flex items-start gap-3 mb-4">
-                                        <BarChart3 className="w-5 h-5 text-amber-400 mt-0.5" />
+                                        <BarChart3 className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
                                         <div>
                                             <p className="text-sm font-medium text-slate-200 mb-1">Icon Names</p>
                                             <p className="text-xs text-slate-400">Film, Users, Trophy, Award, Star, Sparkles, Heart, Target, Zap, Crown, Medal</p>
@@ -734,8 +808,8 @@ export default function Admin() {
                                 </div>
                                 
                                 {(content.stats || []).map((stat, idx) => (
-                                    <div key={idx} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-5">
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div key={idx} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 sm:p-5">
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                                             <div>
                                                 <label className="block text-xs font-medium text-slate-400 mb-2">Icon Name</label>
                                                 <input type="text" value={stat.icon || ''} onChange={(e) => handleArrayChange('stats', idx, 'icon', e.target.value)} placeholder="Film" className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
@@ -760,18 +834,18 @@ export default function Admin() {
 
                         {/* TERTULIA TAB */}
                         {activeTab === 'tertulia' && (
-                            <div className="space-y-8">
-                                <div className="bg-linear-to-br from-amber-500/5 to-orange-500/5 border border-amber-500/20 rounded-xl p-6">
-                                    <h3 className="text-sm font-semibold text-amber-400 mb-5 flex items-center gap-2">
+                            <div className="space-y-6 sm:space-y-8">
+                                <div className="bg-linear-to-br from-amber-500/5 to-orange-500/5 border border-amber-500/20 rounded-xl p-4 sm:p-6">
+                                    <h3 className="text-sm font-semibold text-amber-400 mb-4 sm:mb-5 flex items-center gap-2">
                                         <Coffee className="w-4 h-4" /> Tertulia Main Info
                                     </h3>
-                                    <div className="space-y-5">
+                                    <div className="space-y-4 sm:space-y-5">
                                         <div>
                                             <label className="block text-xs font-medium text-slate-300 mb-2">Page Title</label>
                                             <input
                                                 type="text" name="pageTitle_tertulia" value={content.pageTitle_tertulia || 'Tertulia Sessions'} onChange={handleChange}
                                                 placeholder="Tertulia Sessions"
-                                                className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all font-serif text-lg"
+                                                className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all font-serif text-base sm:text-lg"
                                             />
                                         </div>
                                         <div>
@@ -779,7 +853,7 @@ export default function Admin() {
                                             <textarea
                                                 name="tertuliaDescription" value={content.tertuliaDescription || ''} onChange={handleChange} rows={4}
                                                 placeholder="Enter tertulia description..."
-                                                className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all text-sm leading-relaxed resize-none"
+                                                className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all text-sm leading-relaxed resize-none"
                                             />
                                         </div>
                                     </div>
@@ -802,17 +876,17 @@ export default function Admin() {
                                     supportVideo={true}
                                 />
                                 
-                                <div className="pt-6 border-t border-slate-800/50">
-                                    <div className="flex items-center justify-between mb-5">
+                                <div className="pt-4 sm:pt-6 border-t border-slate-800/50">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-5">
                                         <h3 className="text-sm font-semibold text-slate-200">Media Gallery</h3>
                                         <button
                                             onClick={() => addArrayItem('tertuliaMedia', { label: 'New Media', url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=800&q=80' })}
-                                            className="flex items-center gap-2 px-4 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 rounded-lg text-xs font-medium transition-all hover:scale-105"
+                                            className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 rounded-lg text-xs font-medium transition-all hover:scale-105 w-full sm:w-auto"
                                         >
                                             <Plus className="w-4 h-4" /> Add Media
                                         </button>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {(content.tertuliaMedia || []).map((item, idx) => (
                                             <div key={idx} className="bg-slate-900/50 border border-slate-700/50 rounded-xl overflow-hidden group hover:border-slate-600/50 transition-all">
                                                 <div className="relative">
@@ -852,38 +926,38 @@ export default function Admin() {
 
                         {/* PRODUCTIONS TAB */}
                         {activeTab === 'productions' && (
-                            <div className="space-y-6">
+                            <div className="space-y-4 sm:space-y-6">
                                 {(content.productions || []).map((prod, idx) => {
                                     const isExpanded = expandedProductions[idx]
                                     return (
-                                        <div key={idx} className="relative bg-slate-900/50 border border-slate-700/50 rounded-xl p-6 hover:border-slate-600/50 transition-all">
-                                            <button onClick={() => removeArrayItem('productions', idx)} className="absolute -top-3 -right-3 w-10 h-10 flex items-center justify-center bg-red-500/20 backdrop-blur-sm hover:bg-red-500 text-red-400 hover:text-white rounded-full border-2 border-slate-900 transition-all shadow-lg z-10">
-                                                <X className="w-5 h-5" />
+                                        <div key={idx} className="relative bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:border-slate-600/50 transition-all">
+                                            <button onClick={() => removeArrayItem('productions', idx)} className="absolute -top-3 -right-3 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-red-500/20 backdrop-blur-sm hover:bg-red-500 text-red-400 hover:text-white rounded-full border-2 border-slate-900 transition-all shadow-lg z-10">
+                                                <X className="w-4 h-4 sm:w-5 sm:h-5" />
                                             </button>
                                             
                                             {/* Production Header */}
-                                            <div className="flex items-start justify-between mb-5">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4 sm:mb-5">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center shrink-0">
                                                         <Film className="w-5 h-5 text-yellow-400" />
                                                     </div>
-                                                    <div>
-                                                        <h3 className="text-lg font-bold text-slate-200">{prod.title || `Production #${idx + 1}`}</h3>
+                                                    <div className="min-w-0">
+                                                        <h3 className="text-base sm:text-lg font-bold text-slate-200 truncate">{prod.title || `Production #${idx + 1}`}</h3>
                                                         <p className="text-xs text-slate-500">Production Item</p>
                                                     </div>
                                                 </div>
                                                 <button
                                                     onClick={() => setExpandedProductions({ ...expandedProductions, [idx]: !isExpanded })}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-lg text-xs font-medium transition-all"
+                                                    className="flex items-center justify-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-lg text-xs font-medium transition-all w-full sm:w-auto shrink-0"
                                                 >
                                                     {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                                                    {isExpanded ? 'Collapse' : 'Expand'} Article Editor
+                                                    {isExpanded ? 'Collapse' : 'Expand'} Editor
                                                 </button>
                                             </div>
 
                                             {/* Basic Info */}
-                                            <div className="grid md:grid-cols-3 gap-4 mb-4">
-                                                <div className="md:col-span-2">
+                                            <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+                                                <div className="sm:col-span-2">
                                                     <label className="block text-xs font-medium text-slate-400 mb-2">Production Title</label>
                                                     <input type="text" value={prod.title || ''} onChange={(e) => handleArrayChange('productions', idx, 'title', e.target.value)} placeholder="e.g., Romeo & Juliet" className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50" />
                                                 </div>
@@ -892,28 +966,28 @@ export default function Admin() {
                                                     <input type="text" value={prod.year || ''} onChange={(e) => handleArrayChange('productions', idx, 'year', e.target.value)} placeholder="2024" className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50" />
                                                 </div>
                                             </div>
-                                            <div className="grid md:grid-cols-3 gap-4 mb-4">
+                                            <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
                                                 <div>
                                                     <label className="block text-xs font-medium text-slate-400 mb-2">Genre</label>
                                                     <input type="text" value={prod.genre || ''} onChange={(e) => handleArrayChange('productions', idx, 'genre', e.target.value)} placeholder="Drama, Comedy..." className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50" />
                                                 </div>
-                                                <div className="md:col-span-2">
+                                                <div className="sm:col-span-2">
                                                     <label className="block text-xs font-medium text-slate-400 mb-2">Short Description</label>
                                                     <input type="text" value={prod.description || ''} onChange={(e) => handleArrayChange('productions', idx, 'description', e.target.value)} placeholder="Brief one-liner..." className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50" />
                                                 </div>
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-medium text-slate-400 mb-2">Cover Image/Video</label>
-                                                <div className="flex gap-2 mb-3">
+                                                <div className="flex flex-col sm:flex-row gap-2 mb-3">
                                                     <input type="text" value={prod.image || ''} onChange={(e) => handleArrayChange('productions', idx, 'image', e.target.value)} placeholder="https://..." className="flex-1 bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50" />
-                                                    <label className="cursor-pointer flex items-center gap-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg text-xs font-medium transition-all hover:scale-105">
+                                                    <label className="cursor-pointer flex items-center justify-center gap-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg text-xs font-medium transition-all hover:scale-105 w-full sm:w-auto">
                                                         <Upload className="w-4 h-4" /> Upload
                                                         <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, 'productions', idx, 'image')} />
                                                     </label>
                                                 </div>
                                                 {prod.image && (
                                                     <div className="rounded-lg overflow-hidden border border-slate-700/50">
-                                                        <img src={prod.image} alt="Cover preview" className="w-full h-48 object-cover" />
+                                                        <img src={prod.image} alt="Cover preview" className="w-full h-40 sm:h-48 object-cover" />
                                                     </div>
                                                 )}
                                             </div>
@@ -946,17 +1020,17 @@ export default function Admin() {
 
                         {/* GALLERY TAB */}
                         {activeTab === 'gallery' && (
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between mb-4">
+                            <div className="space-y-4 sm:space-y-6">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                                     <h3 className="text-sm font-semibold text-slate-200">Gallery Items</h3>
                                     <button
                                         onClick={() => addArrayItem('gallery', { label: 'New Media', url: 'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=800&q=80' })}
-                                        className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-400 rounded-lg text-xs font-medium transition-all hover:scale-105"
+                                        className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-400 rounded-lg text-xs font-medium transition-all hover:scale-105 w-full sm:w-auto"
                                     >
                                         <Plus className="w-4 h-4" /> Add Image/Video
                                     </button>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {(content.gallery || []).map((item, idx) => (
                                         <div key={idx} className="bg-slate-900/50 border border-slate-700/50 rounded-xl overflow-hidden group hover:border-slate-600/50 transition-all">
                                             <div className="relative">
@@ -995,37 +1069,37 @@ export default function Admin() {
 
                         {/* TEAM TAB */}
                         {activeTab === 'team' && (
-                            <div className="space-y-6">
+                            <div className="space-y-4 sm:space-y-6">
                                 {(content.team || []).map((member, idx) => {
                                     const isExpanded = expandedTeam[idx]
                                     return (
-                                        <div key={idx} className="relative bg-slate-900/50 border border-slate-700/50 rounded-xl p-6 hover:border-slate-600/50 transition-all">
-                                            <button onClick={() => removeArrayItem('team', idx)} className="absolute -top-3 -right-3 w-10 h-10 flex items-center justify-center bg-red-500/20 backdrop-blur-sm hover:bg-red-500 text-red-400 hover:text-white rounded-full border-2 border-slate-900 transition-all shadow-lg z-10">
-                                                <X className="w-5 h-5" />
+                                        <div key={idx} className="relative bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:border-slate-600/50 transition-all">
+                                            <button onClick={() => removeArrayItem('team', idx)} className="absolute -top-3 -right-3 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-red-500/20 backdrop-blur-sm hover:bg-red-500 text-red-400 hover:text-white rounded-full border-2 border-slate-900 transition-all shadow-lg z-10">
+                                                <X className="w-4 h-4 sm:w-5 sm:h-5" />
                                             </button>
                                             
                                             {/* Member Header */}
-                                            <div className="flex items-start justify-between mb-5">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4 sm:mb-5">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0">
                                                         <Users className="w-5 h-5 text-blue-400" />
                                                     </div>
-                                                    <div>
-                                                        <h3 className="text-lg font-bold text-slate-200">{member.name || `Team Member #${idx + 1}`}</h3>
-                                                        <p className="text-xs text-slate-500">{member.role || 'Team Member'}</p>
+                                                    <div className="min-w-0">
+                                                        <h3 className="text-base sm:text-lg font-bold text-slate-200 truncate">{member.name || `Team Member #${idx + 1}`}</h3>
+                                                        <p className="text-xs text-slate-500 truncate">{member.role || 'Team Member'}</p>
                                                     </div>
                                                 </div>
                                                 <button
                                                     onClick={() => setExpandedTeam({ ...expandedTeam, [idx]: !isExpanded })}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 rounded-lg text-xs font-medium transition-all"
+                                                    className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 rounded-lg text-xs font-medium transition-all w-full sm:w-auto shrink-0"
                                                 >
                                                     {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                                                    {isExpanded ? 'Collapse' : 'Expand'} Bio Editor
+                                                    {isExpanded ? 'Collapse' : 'Expand'} Bio
                                                 </button>
                                             </div>
 
                                             {/* Basic Info */}
-                                            <div className="grid md:grid-cols-3 gap-4 mb-4">
+                                            <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
                                                 <div>
                                                     <label className="block text-xs font-medium text-slate-400 mb-2">Full Name</label>
                                                     <input type="text" value={member.name || ''} onChange={(e) => handleArrayChange('team', idx, 'name', e.target.value)} placeholder="e.g., John Doe" className="w-full bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
@@ -1043,18 +1117,18 @@ export default function Admin() {
                                             {/* Profile Photo */}
                                             <div className="mb-4">
                                                 <label className="block text-xs font-medium text-slate-400 mb-2">Profile Photo</label>
-                                                <div className="flex gap-3 items-start">
-                                                    <div className="flex-1">
-                                                        <div className="flex gap-2 mb-3">
+                                                <div className="flex flex-col sm:flex-row gap-3 items-start">
+                                                    <div className="flex-1 w-full">
+                                                        <div className="flex flex-col sm:flex-row gap-2 mb-3">
                                                             <input type="text" value={member.photo || ''} onChange={(e) => handleArrayChange('team', idx, 'photo', e.target.value)} placeholder="https://..." className="flex-1 bg-slate-950/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
-                                                            <label className="cursor-pointer flex items-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 px-4 py-2 rounded-lg text-xs font-medium transition-all hover:scale-105">
+                                                            <label className="cursor-pointer flex items-center justify-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 px-4 py-2 rounded-lg text-xs font-medium transition-all hover:scale-105 w-full sm:w-auto">
                                                                 <Upload className="w-4 h-4" /> Upload
                                                                 <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'team', idx, 'photo')} />
                                                             </label>
                                                         </div>
                                                     </div>
                                                     {member.photo && (
-                                                        <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-slate-700/50 bg-slate-950 shrink-0">
+                                                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-slate-700/50 bg-slate-950 shrink-0 mx-auto sm:mx-0">
                                                             <img src={member.photo} alt="Profile preview" className="w-full h-full object-cover" />
                                                         </div>
                                                     )}
@@ -1069,7 +1143,7 @@ export default function Admin() {
 
                                             {/* Rich Bio Content (Expandable) */}
                                             {isExpanded && (
-                                                <div className="mt-6 pt-6 border-t border-slate-800/50">
+                                                <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-800/50">
                                                     <ContentBlockEditor
                                                         blocks={member.bio || []}
                                                         onChange={(blockIdx, field, value) => handleNestedContentChange('team', idx, 'bio', blockIdx, field, value)}
